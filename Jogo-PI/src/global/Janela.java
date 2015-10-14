@@ -28,6 +28,7 @@ public class Janela extends JFrame {
 		this.add(renderer);
 		this.addMouseListener(renderer);
 		this.addMouseMotionListener(renderer);
+		this.addComponentListener(renderer);
 		
 		this.setResizable(true);
 		this.pack();
@@ -35,7 +36,6 @@ public class Janela extends JFrame {
 		this.setTitle("Jogo PI");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
-		
 	}
 	
 	public static void main(String[] args) {

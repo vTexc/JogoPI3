@@ -5,40 +5,43 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
+import java.util.Scanner;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
-public class Renderer extends JPanel implements Runnable, Mouse {
-	private final int B_WIDTH = 800;
-	private final int B_HEIGHT = 600;
-	private final int INITIAL_X = -40;
-	private final int INITIAL_Y = -40;
+import jogo.Mapa;
+import jogo.Menu;
+
+public class Renderer extends JPanel implements Runnable, Mouse, ComponentListener {
+	private int B_WIDTH = 800;
+	private int B_HEIGHT = 600;
 	private final int DELAY = 15;
-	
-	private Image imagem;
+	private Jogador jogador;
 	private Thread animator;
-	private int x, y;
+	private Mapa mapa;
+	private Menu menu;
 	
 	public Renderer() {
 		init();
 	}
 	
 	public void init() {
+		setLayout(null);
 		setBackground(Color.WHITE);
 		setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
 		setDoubleBuffered(true);
 		
-		loadImage();
+		jogador = Jogador.getInstancia();
+		jogador.setLabelBounds(0, 0, 200, 20);
+		add(jogador.getLabelRecursos());
 		
-		x = INITIAL_X;
-		y = INITIAL_Y;
-	}
-	
-	public void loadImage() {
-		ImageIcon ii = new ImageIcon("smile.png");
-		imagem = ii.getImage();
+		mapa = Mapa.getInstancia();
+		mapa.setLabelBounds(B_WIDTH/2, 0, 200, 20);
+		add(mapa.getLabelWave());
 	}
 	
 	/** JPanel Overides **/
@@ -46,7 +49,7 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 		super.paintComponent(g);
 		drawImage(g);
 	}
-
+	
 	public void addNotify() {
 		super.addNotify();
 		
@@ -55,18 +58,9 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 	}
 	
 	public void drawImage(Graphics g) {
-		g.drawImage(imagem, x, y, this);
+		jogador.getLabelRecursos();
+		mapa.getLabelWave();
 		Toolkit.getDefaultToolkit().sync();
-	}
-	
-	public void cycle() {
-		x += 1;
-		y += 1;
-		
-		if(y > B_HEIGHT) {
-			y = INITIAL_Y;
-			x = INITIAL_X;
-		}
 	}
 	
 	/** Runnable Overides **/
@@ -77,7 +71,6 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 		
 		while(true) {
 			//Chamar metodos de animção
-			cycle();
 			repaint();
 			//----------------------------------------//
 			
@@ -96,5 +89,30 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 			
 			beforeTime = System.currentTimeMillis();
 		}
+	}
+	
+	@Override
+	public void componentResized(ComponentEvent e) {
+		this.B_WIDTH = this.getWidth();
+		this.B_HEIGHT = this.getHeight();
+		mapa.setLabelBounds(B_WIDTH/2, 0, 200, 20);
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentShown(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

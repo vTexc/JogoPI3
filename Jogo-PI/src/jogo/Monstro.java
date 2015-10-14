@@ -1,8 +1,11 @@
 package jogo;
 
+import java.awt.Image;
+
 public abstract class Monstro {
 	private int vida;
     private float posicaoX, posicaoY;
+    private Image imagem;
     
     public Monstro() {
     	
