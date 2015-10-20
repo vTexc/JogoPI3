@@ -1,22 +1,14 @@
 package global;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 
 public class Janela extends JFrame {
-	private JTextField txt_nome = new JTextField(20);
 	private Renderer renderer;
 	
 	public Janela() {
@@ -33,7 +25,7 @@ public class Janela extends JFrame {
 		this.setResizable(true);
 		this.pack();
 		
-		this.setTitle("Jogo PI");
+		this.setTitle("Troia");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
 	}

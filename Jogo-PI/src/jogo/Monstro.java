@@ -1,19 +1,25 @@
 package jogo;
 
 import java.awt.Image;
+import java.awt.Rectangle;
 
 public abstract class Monstro {
 	private int vida;
     private float posicaoX, posicaoY;
-    private Image imagem;
+    private Rectangle imagem;
     
     public Monstro() {
-    	
+    	imagem = new Rectangle();
+    	imagem.setBounds(0, 600, 20, 20);
     }
     
-    public void imprimir() {
-    	
-    }
+	public Rectangle getImagem() {
+		return imagem;
+	}
+
+	public void setImagem(Rectangle imagem) {
+		this.imagem = imagem;
+	}
 
 	public int getVida() {
 		return vida;

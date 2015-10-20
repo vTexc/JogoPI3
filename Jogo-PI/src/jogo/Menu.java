@@ -1,6 +1,6 @@
 package jogo;
 
-import global.Jogador;
+import global.HUD;
 
 import javax.swing.JLabel;
 

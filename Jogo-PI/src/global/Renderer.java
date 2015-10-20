@@ -8,19 +8,20 @@ import java.awt.Toolkit;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
-import java.util.Scanner;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 import jogo.Mapa;
 import jogo.Menu;
+import jogo.Monstro;
+import jogo.Torre;
 
 public class Renderer extends JPanel implements Runnable, Mouse, ComponentListener {
 	private int B_WIDTH = 800;
 	private int B_HEIGHT = 600;
 	private final int DELAY = 15;
-	private Jogador jogador;
+	private HUD hud;
 	private Thread animator;
 	private Mapa mapa;
 	private Menu menu;
@@ -35,13 +36,13 @@ public class Renderer extends JPanel implements Runnable, Mouse, ComponentListen
 		setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
 		setDoubleBuffered(true);
 		
-		jogador = Jogador.getInstancia();
-		jogador.setLabelBounds(0, 0, 200, 20);
-		add(jogador.getLabelRecursos());
+		hud = HUD.getInstancia();
+		hud.setLabelRecursosBounds(0, 0, 200, 20);
+		hud.setLabelWaveBounds(B_WIDTH/2, 0, 200, 20);
+		add(hud.getLabelRecursos());
+		add(hud.getLabelWave());
 		
-		mapa = Mapa.getInstancia();
-		mapa.setLabelBounds(B_WIDTH/2, 0, 200, 20);
-		add(mapa.getLabelWave());
+		mapa = new Mapa();
 	}
 	
 	/** JPanel Overides **/
@@ -57,9 +58,7 @@ public class Renderer extends JPanel implements Runnable, Mouse, ComponentListen
 		animator.start();
 	}
 	
-	public void drawImage(Graphics g) {
-		jogador.getLabelRecursos();
-		mapa.getLabelWave();
+	public void drawImage(Graphics g) {		
 		Toolkit.getDefaultToolkit().sync();
 	}
 	
@@ -95,7 +94,7 @@ public class Renderer extends JPanel implements Runnable, Mouse, ComponentListen
 	public void componentResized(ComponentEvent e) {
 		this.B_WIDTH = this.getWidth();
 		this.B_HEIGHT = this.getHeight();
-		mapa.setLabelBounds(B_WIDTH/2, 0, 200, 20);
+		hud.setLabelWaveBounds(B_WIDTH/2, 0, 200, 20);
 	}
 
 	@Override
