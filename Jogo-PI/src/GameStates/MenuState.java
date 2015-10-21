@@ -3,6 +3,8 @@ package GameStates;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
+import funcional.Audio;
+
 public class MenuState extends GameState {
 	
 	private int currentChoice = 0;
@@ -15,6 +17,8 @@ public class MenuState extends GameState {
 	private Font titleFont;
 	
 	private Font font;
+	
+	private Audio bgMusic;
 	
 	public MenuState(GameStateManager gsm) {
 		
@@ -33,6 +37,8 @@ public class MenuState extends GameState {
 			e.printStackTrace();
 		}
 		
+//		bgMusic = new Audio("/Audio/MenuBG.mp3");
+//		bgMusic.play();
 	}
 	
 	public void init() {}
@@ -62,12 +68,14 @@ public class MenuState extends GameState {
 	
 	private void select() {
 		if(currentChoice == 0) {
+//			bgMusic.stop();
 			gsm.setState(GameStateManager.PLAY);
 		}
 		if(currentChoice == 1) {
 			// help
 		}
 		if(currentChoice == 2) {
+			bgMusic.stop();
 			System.exit(0);
 		}
 	}

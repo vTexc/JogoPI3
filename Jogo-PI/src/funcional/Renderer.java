@@ -1,7 +1,5 @@
 package funcional;
 
-import global.Mouse;
-
 import java.awt.*;
 import java.awt.image.*;
 import java.awt.event.*;

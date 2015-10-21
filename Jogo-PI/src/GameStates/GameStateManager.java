@@ -3,47 +3,63 @@ package GameStates;
 import java.util.ArrayList;
 
 public class GameStateManager {
-	
-	private ArrayList<GameState> gameStates;
+
+	private GameState[] gameStates;
 	private int currentState;
-	
+
+	public static final int NUMSTATES = 4;
 	public static final int MENU = 0;
 	public static final int OPTIONS = 1;
 	public static final int CREDITS = 2;
 	public static final int PLAY = 3;
-	
+
 	public GameStateManager() {
-		
-		gameStates = new ArrayList<GameState>();
-		
+		gameStates = new GameState[NUMSTATES];
+
 		currentState = MENU;
-		gameStates.add(new MenuState(this));
-		gameStates.add(new OptionState(this));
-		gameStates.add(new CreditState(this));
-		gameStates.add(new PlayState(this));
-		
+		loadState(currentState);
+
+	}
+
+	private void loadState(int state) {
+		if(state == MENU)
+			gameStates[state] = new MenuState(this);
+		if(state == OPTIONS)
+			gameStates[state] = new OptionState(this);
+		if(state == CREDITS)
+			gameStates[state] = new CreditState(this);
+		if(state == PLAY)
+			gameStates[state] = new PlayState(this);
+	}
+	
+	private void unloadState(int state) {
+		gameStates[state] = null;
 	}
 	
 	public void setState(int state) {
+		unloadState(currentState);
 		currentState = state;
-		gameStates.get(currentState).init();
+		loadState(currentState);
+		//gameStates[currentState].init();
 	}
 	
 	public void update() {
-		gameStates.get(currentState).update();
+		try {
+			gameStates[currentState].update();
+		} catch(Exception e) {}
 	}
 	
 	public void draw(java.awt.Graphics2D g) {
-		gameStates.get(currentState).draw(g);
+		try {
+			gameStates[currentState].draw(g);
+		} catch(Exception e) {}
 	}
 	
-
 	public void keyPressed(int k) {
-		gameStates.get(currentState).keyPressed(k);
+		gameStates[currentState].keyPressed(k);
 	}
 	
 	public void keyReleased(int k) {
-		gameStates.get(currentState).keyReleased(k);
+		gameStates[currentState].keyReleased(k);
 	}
-	
 }

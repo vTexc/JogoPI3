@@ -4,13 +4,13 @@ import java.awt.Image;
 import java.awt.Rectangle;
 
 public abstract class Monstro {
-	private int vida;
+	private int vida, vidaMax;
     private float posicaoX, posicaoY;
+    private boolean morto;
     private Rectangle imagem;
     
     public Monstro() {
     	imagem = new Rectangle();
-    	imagem.setBounds(0, 600, 20, 20);
     }
     
 	public Rectangle getImagem() {
