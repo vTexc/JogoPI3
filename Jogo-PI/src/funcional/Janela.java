@@ -1,5 +1,6 @@
-package global;
+package funcional;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -17,15 +18,12 @@ public class Janela extends JFrame {
 	}
 	
 	public void init() {
-		this.add(renderer);
-		this.addMouseListener(renderer);
-		this.addMouseMotionListener(renderer);
-		this.addComponentListener(renderer);
+		this.setTitle("Troia");
+		this.setContentPane(renderer);
 		
-		this.setResizable(true);
+		this.setResizable(false);
 		this.pack();
 		
-		this.setTitle("Troia");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
 	}
