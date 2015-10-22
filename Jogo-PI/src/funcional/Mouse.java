@@ -8,42 +8,42 @@ public interface Mouse extends MouseListener, MouseMotionListener {
 	@Override
 	public default void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
-		System.out.println("Arasstou");
+//		System.out.println("Arastou");
 	}
 
 	@Override
 	public default void mouseMoved(MouseEvent e) {
-		System.out.println(e.getX() + " " + e.getY());
+//		System.out.println(e.getX() + " " + e.getY());
 	}
 
 	@Override
 	public default void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
-		System.out.println("Clicou");
+//		System.out.println("Clicou");
 	}
 
 	@Override
 	public default void mousePressed(MouseEvent e) {
 		// TODO Auto-generated method stub
-		System.out.println("Pressionou");
+//		System.out.println("Pressionou");
 	}
 
 	@Override
 	public default void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
-		System.out.println("Soltou");
+//		System.out.println("Soltou");
 	}
 
 	@Override
 	public default void mouseEntered(MouseEvent e) {
 		// TODO Auto-generated method stub
-		System.out.println("Entrou");
+//		System.out.println("Entrou");
 	}
 
 	@Override
 	public default void mouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
-		System.out.println("Saiu");
+//		System.out.println("Saiu");
 	}
 
 }

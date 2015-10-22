@@ -101,4 +101,10 @@ public class MenuState extends GameState {
 	public void keyReleased(int k) {
 		
 	}
+
+	@Override
+	public void mouseClicked(int k, int x, int y) {
+		// TODO Auto-generated method stub
+		
+	}
 }

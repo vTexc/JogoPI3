@@ -118,4 +118,8 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 	public void keyReleased(KeyEvent key) {
 		gsm.keyReleased(key.getKeyCode());
 	}
+	
+	public void mouseClicked(MouseEvent e) {
+		gsm.mouseClicked(e.getButton(), e.getX(), e.getY());
+	}
 }

@@ -16,7 +16,7 @@ public class GameStateManager {
 	public GameStateManager() {
 		gameStates = new GameState[NUMSTATES];
 
-		currentState = MENU;
+		currentState = PLAY;
 		loadState(currentState);
 
 	}
@@ -61,5 +61,9 @@ public class GameStateManager {
 	
 	public void keyReleased(int k) {
 		gameStates[currentState].keyReleased(k);
+	}
+	
+	public void mouseClicked(int k, int x, int y) {
+		gameStates[currentState].mouseClicked(k, x, y);
 	}
 }
