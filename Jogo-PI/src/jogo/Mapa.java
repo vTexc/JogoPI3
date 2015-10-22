@@ -1,24 +1,30 @@
 package jogo;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.util.ArrayList;
+import java.awt.*;
+import java.awt.image.*;
+import java.util.*;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.imageio.ImageIO;
 
 public class Mapa {
+	private int[][] mapa;
+	private BufferedImage bg;
+	
 	private ArrayList<Torre> torres;
 	private ArrayList<Monstro> monstros;
 
 	public Mapa() {
+		mapa = new int[13][19];
 		monstros = new ArrayList<Monstro>();
 		torres = new ArrayList<Torre>();
 	}
 	
+	public void loadImage() {
+	}
+	
 	public void reset() {
-		monstros = new ArrayList<Monstro>();
-		torres = new ArrayList<Torre>();
+		monstros.clear();
+		torres.clear();
 	}
 	
 	public void draw(Graphics g) {

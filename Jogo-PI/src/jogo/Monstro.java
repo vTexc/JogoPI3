@@ -1,7 +1,6 @@
 package jogo;
 
-import java.awt.Image;
-import java.awt.Rectangle;
+import java.awt.*;
 
 public abstract class Monstro {
 	private int vida, vidaMax;
@@ -10,17 +9,9 @@ public abstract class Monstro {
     private Rectangle imagem;
     
     public Monstro() {
-    	imagem = new Rectangle();
+    	imagem = new Rectangle(new Dimension(10, 20));
     }
     
-	public Rectangle getImagem() {
-		return imagem;
-	}
-
-	public void setImagem(Rectangle imagem) {
-		this.imagem = imagem;
-	}
-
 	public int getVida() {
 		return vida;
 	}
