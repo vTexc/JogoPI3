@@ -1,6 +1,10 @@
+/**
+ * Tela de opções
+ */
 package GameStates;
 
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
 
 public class OptionState extends GameState {
 	public OptionState (GameStateManager gsm) {
@@ -38,7 +42,7 @@ public class OptionState extends GameState {
 	}
 
 	@Override
-	public void mouseClicked(int k, int x, int y) {
+	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
 	}

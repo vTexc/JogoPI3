@@ -1,7 +1,11 @@
+/*
+ * Tela de menu
+ */
 package GameStates;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 
 import funcional.Audio;
 
@@ -103,7 +107,7 @@ public class MenuState extends GameState {
 	}
 
 	@Override
-	public void mouseClicked(int k, int x, int y) {
+	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
 	}

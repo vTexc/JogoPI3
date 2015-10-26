@@ -2,6 +2,8 @@ package AEstrela;
 
 import java.util.*;
 
+import funcional.TileBasedMap;
+
 public class AStarPathFinder implements PathFinder {
 	/** The set of nodes that have been searched through */
 	private ArrayList closed = new ArrayList();
@@ -65,7 +67,7 @@ public class AStarPathFinder implements PathFinder {
 	/**
 	 * @see PathFinder#findPath(Mover, int, int, int, int)
 	 */
-	public Path findPath(Mover mover, int sx, int sy, int tx, int ty) {
+	public Path findPath(int mover, int sx, int sy, int tx, int ty) {
 		// easy first check, if the destination is blocked, we can't get there
 
 		if (map.blocked(mover, tx, ty)) {
@@ -293,7 +295,7 @@ public class AStarPathFinder implements PathFinder {
 	 *            The y coordinate of the location to check
 	 * @return True if the location is valid for the given mover
 	 */
-	protected boolean isValidLocation(Mover mover, int sx, int sy, int x, int y) {
+	protected boolean isValidLocation(int mover, int sx, int sy, int x, int y) {
 		boolean invalid = (x < 0) || (y < 0) || (x >= map.getWidthInTiles())
 				|| (y >= map.getHeightInTiles());
 
@@ -319,7 +321,7 @@ public class AStarPathFinder implements PathFinder {
 	 *            The y coordinate of the target location
 	 * @return The cost of movement through the given tile
 	 */
-	public float getMovementCost(Mover mover, int sx, int sy, int tx, int ty) {
+	public float getMovementCost(int mover, int sx, int sy, int tx, int ty) {
 		return map.getCost(mover, sx, sy, tx, ty);
 	}
 
@@ -339,7 +341,7 @@ public class AStarPathFinder implements PathFinder {
 	 *            The y coordinate of the target location
 	 * @return The heuristic cost assigned to the tile
 	 */
-	public float getHeuristicCost(Mover mover, int x, int y, int tx, int ty) {
+	public float getHeuristicCost(int mover, int x, int y, int tx, int ty) {
 		return heuristic.getCost(map, mover, x, y, tx, ty);
 	}
 

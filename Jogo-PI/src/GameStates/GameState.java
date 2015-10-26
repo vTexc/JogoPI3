@@ -1,4 +1,9 @@
+/**
+ * Interface definindo os metodos para os estados do jogo
+ */
 package GameStates;
+
+import java.awt.event.MouseEvent;
 
 public abstract class GameState {
 	
@@ -9,5 +14,5 @@ public abstract class GameState {
 	public abstract void draw(java.awt.Graphics2D g);	
 	public abstract void keyPressed(int k);
 	public abstract void keyReleased(int k);
-	public abstract void mouseClicked(int k, int x, int y);
+	public abstract void mouseClicked(MouseEvent e);
 }

@@ -1,17 +1,20 @@
+/**
+ * Classe principal do jogo, onde fica a imagem a ser impressa na janela
+ * 
+ * Metodos:
+ * 		Construtor - Inicializa a classe
+ * 		AddNotify - Inicializa a thread
+ * 		Init - Iniciliza o necessario para o funcionamento
+ **/
 package funcional;
 
 import java.awt.*;
 import java.awt.image.*;
 import java.awt.event.*;
 
-import javax.swing.ImageIcon;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import GameStates.GameStateManager;
-import GameStates.MenuState;
-import jogo.Mapa;
-import jogo.Monstro;
-import jogo.Torre;
 
 @SuppressWarnings("serial")
 public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
@@ -22,25 +25,28 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 	// Thread
 	private Thread thread;
 	private boolean running;
+	
+	// Controle de FPS pelo thread
 	private int FPS = 60;
 	private long targetTime = 1000 / FPS;
 
-	// Image
+	// Imagem (NAO MEXER)
 	private BufferedImage image;
 	private Graphics2D g;
 
-	// GameStateManager
+	// Gerenciador do estado do jogo
 	private GameStateManager gsm;
-
+	
+	// Construtor
 	public Renderer() {
 		super();
-		setPreferredSize(new Dimension(WIDTH, HEIGHT));
+		setPreferredSize(new Dimension(WIDTH, HEIGHT)); // Define o tamanho da tela
 		setFocusable(true);
 		requestFocus();
-		setBackground(Color.WHITE);
-		setLayout(null);
+		setLayout(null); // Define que a posiçao dos objeto nao eh predefinida
 	}
 
+	//Inicializa Thread
 	public void addNotify() {
 		super.addNotify();
 		if (thread == null) {
@@ -52,15 +58,17 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 		}
 	}
 
+	// Cria o formato de imagem para impressao na tela
 	private void init() {
 		image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 		g = (Graphics2D) image.getGraphics();
-		running = true;
+		running = true; // Define que o programa esta rodando
 
-		gsm = new GameStateManager();
+		gsm = new GameStateManager(); // Inizializa o gerenciador
 	}
 
 	/** Runnable Overides **/
+	// 
 	public void run() {
 
 		init();
@@ -69,7 +77,7 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 		long elapsed;
 		long wait;
 
-		// game loop
+		// Game Loop
 		while (running) {
 
 			start = System.nanoTime();
@@ -89,25 +97,27 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
 		}
-
 	}
-
+	
+	// Atualiza as informaçoes que irão para tela
 	private void update() {
 		gsm.update();
 	}
-
+	
+	// Desenha as informações na tela
 	private void draw() {
 		gsm.draw(g);
 	}
 
+	// Mostra a imagem gerada pelo draw()
 	private void drawToScreen() {
 		Graphics g2 = getGraphics();
 		g2.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
 		g2.dispose();
 	}
-
+	
+	/** Listeners **/
 	public void keyTyped(KeyEvent key) {
 	}
 
@@ -120,6 +130,6 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 	}
 	
 	public void mouseClicked(MouseEvent e) {
-		gsm.mouseClicked(e.getButton(), e.getX(), e.getY());
+		gsm.mouseClicked(e);
 	}
 }

@@ -1,5 +1,10 @@
 package jogo;
 
-public class MonstroTerrestre {
+import AEstrela.PathFinder;
 
+public class MonstroTerrestre extends Monstro {
+
+	public MonstroTerrestre() {
+		super(2);
+	}
 }

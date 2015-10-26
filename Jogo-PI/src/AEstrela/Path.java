@@ -3,7 +3,7 @@ package AEstrela;
 import java.util.ArrayList;
 
 public class Path {
-	private ArrayList steps = new ArrayList();
+	private ArrayList<Step> steps = new ArrayList<Step>();
 
 	public Path() {
 
@@ -18,17 +18,21 @@ public class Path {
 	}
 
 	public int getX(int index) {
-		return getStep(index).x;
+		return steps.get(index).getX();
 	}
 
 	public int getY(int index) {
-		return getStep(index).y;
+		return steps.get(index).getY();
 	}
 
 	public void appendStep(int x, int y) {
 		steps.add(new Step(x, y));
 	}
-
+	
+	public void setSteps(ArrayList steps) {
+		this.steps = steps;
+	}
+	
 	public void prependStep(int x, int y) {
 		steps.add(0, new Step(x, y));
 	}
@@ -36,36 +40,8 @@ public class Path {
 	public boolean contains(int x, int y) {
 		return steps.contains(new Step(x, y));
 	}
-
-	public class Step {
-		private int x;
-		private int y;
-
-		public Step(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
-
-		public int getX() {
-			return x;
-		}
-
-		public int getY() {
-			return y;
-		}
-
-		public int hashCode() {
-			return x * y;
-		}
-
-		public boolean equals(Object other) {
-			if (other instanceof Step) {
-				Step o = (Step) other;
-
-				return (o.x == x) && (o.y == y);
-			}
-
-			return false;
-		}
+	
+	public boolean isEmpty() {
+		return steps.isEmpty();
 	}
 }

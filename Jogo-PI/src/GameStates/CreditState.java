@@ -1,6 +1,10 @@
+/**
+ * Tela de créditos
+ */
 package GameStates;
 
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
 
 public class CreditState extends GameState {
 	public CreditState(GameStateManager gsm) {
@@ -38,7 +42,7 @@ public class CreditState extends GameState {
 	}
 
 	@Override
-	public void mouseClicked(int k, int x, int y) {
+	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
 	}

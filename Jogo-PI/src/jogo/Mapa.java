@@ -6,10 +6,8 @@ import java.util.*;
 
 import javax.imageio.ImageIO;
 
-import AEstrela.Mover;
+import funcional.TileBasedMap;
 import AEstrela.PathFinder;
-import AEstrela.TileBasedMap;
-import AEstrela.UnitMover;
 
 public class Mapa implements TileBasedMap {
 	private static final int WIDTH = 19;
@@ -20,25 +18,20 @@ public class Mapa implements TileBasedMap {
 	private static final int MURO = 1;
 	private static final int OUTROS = 2;
 	private static final int VOADOR = 3;
+	private static final int TORRE = 4;
 	
 	private int[][] mapa;
-
+	
 	private boolean[][] visited;
 	
-	private ArrayList<Torre> torres;
-	private ArrayList<Monstro> monstros;
-
 	public Mapa() {
-		mapa = new int[13][19];
+		mapa = new int[HEIGHT][WIDTH];
 		visited = new boolean[WIDTH][HEIGHT];
 		
-		for(int x = 0; x < 13; x++)
-			for(int y = 0; y < 19; y++)
+		for(int x = 0; x < HEIGHT; x++)
+			for(int y = 0; y < WIDTH; y++)
 				if((x == 0 || y == 0 || x == 12 || y == 18) && x != 6)
 				mapa[x][y] = MURO;
-				
-		monstros = new ArrayList<Monstro>();
-		torres = new ArrayList<Torre>();
 	}
 	
 	public void loadImage() {
@@ -48,14 +41,16 @@ public class Mapa implements TileBasedMap {
 		mapa[y][x] = k;
 	}
 	
+	public boolean placeTorre(int x, int y) {
+		return (mapa[y][x] == TORRE || mapa[y][x] == MURO || mapa[y][x] == OUTROS || mapa[y][x] == VOADOR);
+	}
+	
 	public void reset() {
-		monstros.clear();
-		torres.clear();
 	}
 	
 	public void draw(Graphics2D g) {
-		for(int x = 0; x < 13; x++)
-			for(int y = 0; y < 19; y++)
+		for(int x = 0; x < HEIGHT; x++)
+			for(int y = 0; y < WIDTH; y++)
 				if(mapa[x][y] == MURO) {
 					g.setColor(Color.gray);
 					g.fillRect(y*50, x*50, 50, 50);
@@ -63,8 +58,8 @@ public class Mapa implements TileBasedMap {
 	}
 	
 	public void clearVisited() {
-		for (int x=0;x<getWidthInTiles();x++) {
-			for (int y=0;y<getHeightInTiles();y++) {
+		for (int x = 0; x < getWidthInTiles(); x++) {
+			for (int y = 0; y < getHeightInTiles(); y++) {
 				visited[x][y] = false;
 			}
 		}
@@ -91,14 +86,12 @@ public class Mapa implements TileBasedMap {
 	/**
 	 * @see TileBasedMap#blocked(Mover, int, int)
 	 */
-	public boolean blocked(Mover mover, int x, int y) {
-		int unit = ((UnitMover) mover).getType();
-		
-		if(unit == VOADOR) {
+	public boolean blocked(int mover, int x, int y) {
+		if(mover == VOADOR) {
 			return mapa[y][x] == MURO;
 		}
 		
-		if(unit == OUTROS) {
+		if(mover == OUTROS) {
 			return mapa[y][x] != TERRENO;
 		}
 		
@@ -108,7 +101,7 @@ public class Mapa implements TileBasedMap {
 	/**
 	 * @see TileBasedMap#getCost(Mover, int, int, int, int)
 	 */
-	public float getCost(Mover mover, int sx, int sy, int tx, int ty) {
+	public float getCost(int mover, int sx, int sy, int tx, int ty) {
 		return 1;
 	}
 
@@ -132,5 +125,4 @@ public class Mapa implements TileBasedMap {
 	public void pathFinderVisited(int x, int y) {
 		visited[x][y] = true;
 	}
-	
 }
