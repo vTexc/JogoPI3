@@ -66,12 +66,12 @@ public class PlayState extends GameState {
 	// Atualiza informaçoes
 	public void update() {
 		hud.update();
-		
+
 		ArrayList<Monstro> aux = (ArrayList<Monstro>) monstros.clone();
-		
+
 		for (Monstro m : aux) {
-			m.andar();
-			if(m.isScreenOut() || m.isDead()) {
+			m.update();
+			if (m.isScreenOut() || m.isDead()) {
 				aux.remove(m);
 			}
 		}
@@ -91,13 +91,13 @@ public class PlayState extends GameState {
 				if (pathT != null) {
 					if (pathT.contains(x, y)) {
 						g.setColor(Color.blue);
-						g.fillRect((x * 50) + 4, (y * 50) + 4, 42, 42);
+						g.fillRect((x * 50) + 35/2, (y * 50) + 35/2, 15, 15);
 					}
 				}
 				if (pathV != null) {
 					if (pathV.contains(x, y)) {
 						g.setColor(Color.red);
-						g.fillRect((x * 50) + 4, (y * 50) + 4, 42, 42);
+						g.fillRect((x * 50) + 40/2, (y * 50) + 40/2, 10, 10);
 					}
 				}
 			}
@@ -111,7 +111,7 @@ public class PlayState extends GameState {
 		// Desenha Monstros
 		for (Monstro m : monstros) {
 			g.setColor(Color.gray);
-			g.fillRect((int)(m.getPosicaoX() + (25 - m.getImagem().getWidth()/2)), (int) (m.getPosicaoY() + m.getImagem().getHeight()), (int) m.getImagem().getWidth(), (int) m.getImagem().getHeight());
+			g.fillRect((int) (m.getPosicaoX()), (int) (m.getPosicaoY()), (int) m.getImagem().getWidth(), (int) m.getImagem().getHeight());
 		}
 
 		// Desenha HuD
@@ -155,8 +155,7 @@ public class PlayState extends GameState {
 			}
 		}
 
-		if (e.getButton() == MouseEvent.BUTTON1
-				&& !mapa.placeTorre(x / 50, y / 50)) {
+		if (e.getButton() == MouseEvent.BUTTON1 && !mapa.placeTorre(x / 50, y / 50)) {
 			mapa.setMapa(x / 50, y / 50, 4);
 			if (finder.findPath(2, 0, 6, 18, 6) != null) {
 				torres.add(new TorreTerrestre(x, y));

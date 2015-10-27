@@ -1,16 +1,16 @@
 package jogo;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
+import java.awt.*;
 
 import javax.swing.JLabel;
 
 public class HUD {
 	private int recursos;
 	private int wave;
+	private int score;
 	private String sRecursos;
 	private String sWave;
+	private String sScore;
 	private static HUD instancia;
 	public JLabel labelWave;
 	boolean griding;
@@ -20,9 +20,8 @@ public class HUD {
 	private HUD() {
 		wave = 1;
 		recursos = 0;
-		sRecursos = "Recursos : " + recursos;
-		sWave = "Wave : " + wave;
-		font = new Font("Arial", Font.PLAIN, 15);	
+		score = 0;
+		font = new Font("Arial", Font.PLAIN, 25);	
 		griding = true;	
 	}
 	
@@ -71,25 +70,34 @@ public class HUD {
 		wave++;
 	}
 	
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+
 	public void update() {
-		sRecursos = "Recursos : " + recursos;
-		sWave = "Wave : " + wave;
+		sRecursos = "Recursos : " + String.format("%06d", recursos);
+		sWave = "Wave : " + String.format("%03d", wave);
+		sScore = "Score : " + String.format("%08d", score);
 	}
 	
 	public void draw(Graphics2D g) {
 		if(griding) {
 			g.setColor(Color.WHITE);
-			for(int x = 0; x < 950; x += 50) {
-				for(int y = 0; y < 650; y += 50) {
-					g.drawLine(x, 0, x, 650);
-					g.drawLine(0, y, 950, y);
+			for(int x = 50; x < 901; x += 50) {
+				for(int y = 50; y < 601; y += 50) {
+					g.drawLine(x, 50, x, 600);
+					g.drawLine(50, y, 900, y);
 				}
 			}
 		}
 		g.setFont(font);
-		g.setColor(Color.RED);
+		g.setColor(Color.WHITE);
 		g.drawString(sRecursos, 5, font.getSize());
-		g.drawString(sWave, 950/2, font.getSize());
-		
+		g.drawString(sWave, 950/2 - font.getSize()*2, font.getSize());
+		g.drawString(sScore, 950 - ((sScore.length()/2) * font.getSize()), font.getSize());		
 	}
 }
