@@ -37,6 +37,7 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 	// Gerenciador do estado do jogo
 	private GameStateManager gsm;
 	
+	public static double deltaTime;
 	// Construtor
 	public Renderer() {
 		super();
@@ -89,6 +90,7 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 			elapsed = System.nanoTime() - start;
 
 			wait = targetTime - elapsed / 1000000;
+			deltaTime = wait;
 			if (wait < 0)
 				wait = 5;
 

@@ -3,6 +3,7 @@ package jogo;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
@@ -13,19 +14,29 @@ public abstract class Torre extends JComponent implements Mouse {
 	private int vida, vidaMax;
 	// Status da torre
 	private int dano;
-	private double atqSpd;
 	private int range;
 	private int upgrade;
+	
+	private double atqTime = 1;
+	private double maxAtqTime;
+	
+	private int custo;
 	// Imagem
 	private Rectangle imagem;
 	private Color color;
 	
+	private Monstro target;
+	
 	private boolean selecionado;
 	// Construtor
-	public Torre(int x, int y, int range, Color cor) {
+	public Torre(int x, int y, int custo, int dano, int range, double atqTime, Color cor) {
 		this.setImagem(new Rectangle(x, y, 50, 50));
+		this.dano = dano;
 		this.color = cor;
 		this.range = range;
+		this.target = null;
+		this.maxAtqTime = atqTime;
+		this.custo = custo;
 		setBounds(imagem);
 	}
 	// Retorna cor (Temporario)
@@ -52,14 +63,6 @@ public abstract class Torre extends JComponent implements Mouse {
 	public int getDano() {
 		return dano;
 	}
-	//Retorna ataque speed da torre
-	public double getAtqSpd() {
-		return atqSpd;
-	}
-	// Altera ataque speed da dorre
-	public void setAtqSpd(double atqSpd) {
-		this.atqSpd = atqSpd;
-	}
 	// Retorna rage da torre
 	public int getRange() {
 		return range;
@@ -67,5 +70,35 @@ public abstract class Torre extends JComponent implements Mouse {
 	// Altera range da torre
 	public void setRange(int range) {
 		this.range = range;
-	}	
+	}
+	
+	public Monstro getTarget() {
+		return target;
+	}
+	
+	public void setTarget(Monstro target) {
+		this.target = target;
+	}
+	
+	public double getAtqTime() {
+		return atqTime;
+	}
+	
+	public void setAtqTime(double atqTime) {
+		this.atqTime = atqTime;
+	}
+	
+	public double getMaxAtqTime() {
+		return maxAtqTime;
+	}
+	
+	public void setMaxAtqTime(double maxAtqTime) {
+		this.maxAtqTime = maxAtqTime;
+	}
+	
+	public int getCusto() {
+		return custo;
+	}
+
+	public abstract Monstro calculateRange(ArrayList<Monstro> monstros);
 }

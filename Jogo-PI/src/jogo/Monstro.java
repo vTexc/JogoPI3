@@ -9,11 +9,13 @@ import java.awt.*;
 import javax.swing.JComponent;
 
 import funcional.Janela;
+import funcional.Renderer;
 import AEstrela.*;
 
 public abstract class Monstro extends JComponent {
 	// HP do monstro
 	private int vida, vidaMax;
+	private int recurso;
 	// Posiçao e espaços na matriz
 	private double posicaoX, posicaoY;
 	private double speed;
@@ -32,14 +34,18 @@ public abstract class Monstro extends JComponent {
 	private static final int BAIXO = 1;
 	private static final int ESQUERDA = 2;
 	private static final int DIREITA = 3;
-	// Verifica se esta sobre efeito
+	// Verifica status do monstro
 	private boolean slow;
+	private boolean morto;
+	private boolean foraDaTela;
 	
 	//Construtor
-	public Monstro(int x) {
+	public Monstro(int x, int vida, int recurso) {
 		this.imagem = new Rectangle(new Dimension(10, 20));
 		this.posicaoX = (int) (-49) + (25 - getImagem().getWidth() / 2);
 		this.posicaoY = (int) (650 / 13 * 6) + (25 - getImagem().getHeight() / 2);
+		this.vida = vida;
+		this.recurso = recurso;
 		this.mover = x;
 		this.direcao = DIREITA;
 		this.speed = 1;
@@ -52,6 +58,9 @@ public abstract class Monstro extends JComponent {
 	//Subtrai x da vida do monstro
 	public void subVida(int x) {
 		this.vida -= x;
+		if(this.vida <= 0) {
+			morto = true;
+		}
 	}
 	//Retorna posicao x (Largura) atual do monstro 
 	public double getPosicaoX() {
@@ -92,20 +101,28 @@ public abstract class Monstro extends JComponent {
 	}
 	// Verifica estado atual do monstro (Vivo/Morto)
 	public boolean isDead() {
-		return (this.vida <= 0);
+		if(morto) {
+			HUD.getInstancia().addRecursos(this.recurso);
+		}
+		return morto;
 	}
 	// Verifica se o monstro chegou ao final do caminho
 	public boolean isScreenOut() {
-		return (this.posicaoX > 950);
+		if(this.posicaoX > 950) {
+			foraDaTela = true;
+			HUD.getInstancia().subVidas();
+		}
+		return foraDaTela;
 	}
 	// Atualiza informações do monstro
-	public void update() {
+	public void update(PathFinder finder) {
 		this.andar();
 		if (!slow) {
 
 		} else {
 
 		}
+		this.atualizarCaminho(finder);
 	}
 	// Atualiza posicao atual do monstro
 	// Usa o caminho como referencia
@@ -121,7 +138,7 @@ public abstract class Monstro extends JComponent {
 		
 		// Calcula a direcao atual
 		double angulo = Math.atan2(distY, distX);
-		this.posicaoX += this.speed * Math.cos(angulo);
-		this.posicaoY += this.speed * Math.sin(angulo);
+		this.posicaoX += 50 * (Math.cos(angulo) * Renderer.deltaTime/1000) * this.speed;
+		this.posicaoY += 50 * (Math.sin(angulo) * Renderer.deltaTime/1000) * this.speed;
 	}
 }

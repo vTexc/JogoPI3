@@ -7,20 +7,20 @@ import javax.swing.JLabel;
 public class HUD {
 	private int recursos;
 	private int wave;
-	private int score;
+	private int vidas;
 	private String sRecursos;
 	private String sWave;
-	private String sScore;
+	private String sVidas;
 	private static HUD instancia;
 	public JLabel labelWave;
-	boolean griding;
-	
+	private boolean griding;
+	private boolean gameOver;
 	private Font font;
 	
 	private HUD() {
 		wave = 1;
-		recursos = 0;
-		score = 0;
+		recursos = 100;
+		vidas = 20;
 		font = new Font("Arial", Font.PLAIN, 25);	
 		griding = true;	
 	}
@@ -32,7 +32,7 @@ public class HUD {
 		return instancia;
 	}
 	
-	public static synchronized void initInstancia() {
+	private static synchronized void initInstancia() {
 		if(instancia == null) {
 			instancia = new HUD();
 		}
@@ -70,18 +70,18 @@ public class HUD {
 		wave++;
 	}
 	
-	public int getScore() {
-		return score;
+	public int getVidas() {
+		return vidas;
 	}
 
-	public void setScore(int score) {
-		this.score = score;
+	public void subVidas() {
+		this.vidas--;
 	}
-
+	
 	public void update() {
 		sRecursos = "Recursos : " + String.format("%06d", recursos);
 		sWave = "Wave : " + String.format("%03d", wave);
-		sScore = "Score : " + String.format("%08d", score);
+		sVidas = "Vidas : " + String.format("%02d", vidas);
 	}
 	
 	public void draw(Graphics2D g) {
@@ -98,6 +98,6 @@ public class HUD {
 		g.setColor(Color.WHITE);
 		g.drawString(sRecursos, 5, font.getSize());
 		g.drawString(sWave, 950/2 - font.getSize()*2, font.getSize());
-		g.drawString(sScore, 950 - ((sScore.length()/2) * font.getSize()), font.getSize());		
+		g.drawString(sVidas, 950 - ((sVidas.length()/2) * font.getSize()) - 5, font.getSize());		
 	}
 }
