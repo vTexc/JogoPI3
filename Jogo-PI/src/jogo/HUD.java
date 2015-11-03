@@ -19,7 +19,7 @@ public class HUD {
 	
 	private HUD() {
 		wave = 1;
-		recursos = 100;
+		recursos = 30000;
 		vidas = 20;
 		font = new Font("Arial", Font.PLAIN, 25);	
 		griding = true;	

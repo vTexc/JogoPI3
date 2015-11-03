@@ -87,4 +87,20 @@ public class GameStateManager {
 	public void mouseClicked(MouseEvent e) {
 		gameStates[currentState].mouseClicked(e);
 	}
+	
+	public void mousePressed(MouseEvent e) {
+		gameStates[currentState].mousePressed(e);
+	}
+	
+	public void mouseReleased(MouseEvent e) {
+		gameStates[currentState].mouseReleased(e);
+	}
+	
+	public void mouseMoved(MouseEvent e) {
+		gameStates[currentState].mouseMoved(e);
+	}
+	
+	public void mouseDragged(MouseEvent e) {
+		gameStates[currentState].mouseDragged(e);
+	}
 }

@@ -377,8 +377,14 @@ public class AStarPathFinder implements PathFinder {
 		 *            The element to add
 		 */
 		public void add(Object o) {
-			list.add(o);
-			Collections.sort(list);
+			try {
+				synchronized (list) {
+					list.add(o);
+					Collections.sort(list);
+				}
+			} catch(NullPointerException e) {
+				return;
+			}
 		}
 
 		/**

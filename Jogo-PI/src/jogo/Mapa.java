@@ -18,7 +18,9 @@ public class Mapa implements TileBasedMap {
 	private static final int MURO = 1;
 	private static final int OUTROS = 2;
 	private static final int VOADOR = 3;
-	private static final int TORRE = 4;
+	private static final int TORRE_T = 4;
+	private static final int TORRE_V = 5;
+	private static final int TORRE_S = 6;
 	
 	private int[][] mapa;
 	
@@ -37,12 +39,12 @@ public class Mapa implements TileBasedMap {
 	public void loadImage() {
 	}
 	
-	public void setMapa(int x, int y, int k) {
+	private void setMapa(int x, int y, int k) {
 		mapa[y][x] = k;
 	}
 	
-	public boolean placeTorre(int x, int y) {
-		return (mapa[y][x] == TORRE || mapa[y][x] == MURO || mapa[y][x] == OUTROS || mapa[y][x] == VOADOR);
+	private boolean placeTorre(int x, int y) {
+		return (mapa[y][x] == TERRENO || mapa[y][x] == VOADOR);
 	}
 	
 	public void reset() {
@@ -124,5 +126,59 @@ public class Mapa implements TileBasedMap {
 	 */
 	public void pathFinderVisited(int x, int y) {
 		visited[x][y] = true;
+	}
+	
+	public void update(ArrayList<Monstro> monstros) {
+		for(Monstro m: monstros) {
+			int mX = (int) (m.getPosicaoX()/50);
+			int mY = (int) (m.getPosicaoY()/50);
+			
+			mapa[mY][mX] = m.getTipo(); 
+		}
+	}
+	
+	public synchronized void placeTorre(int tipo, int x, int y, PathFinder finder, ArrayList<Torre> torres, ArrayList<Monstro> monstros) {
+		Torre torre = null;
+		
+		if(tipo == TORRE_T)
+			torre = new TorreTerrestre(x, y, 1, 1);
+		else if(tipo == TORRE_V)
+			torre = new TorreVoador(x, y, 1, 1);
+		else if(tipo == TORRE_S)
+			torre = new TorreSuporte(x, y);
+
+		if(placeTorre(x / 50, y / 50)) {
+			this.setMapa(x / 50, y / 50, torre.getTipo());
+			if (finder.findPath(2, 0, 6, 18, 6) != null) {
+				torres.add(torre);
+				HUD.getInstancia().subRecursos(torres.get(torres.size() - 1).getCusto());
+				if (HUD.getInstancia().getRecursos() < 0) {
+					HUD.getInstancia().addRecursos(torres.get(torres.size() - 1).getCusto());
+					torres.remove(torres.size() - 1);
+					this.setMapa(x / 50, y / 50, 0);
+				} else {
+					for (Monstro m : monstros) {
+						m.atualizarCaminho(finder);
+						if (!m.hasCaminho()) {
+							HUD.getInstancia().addRecursos(torres.get(torres.size() - 1).getCusto());
+							setMapa(x / 50, y / 50, 0);
+							torres.remove(torres.size() - 1);
+							m.atualizarCaminho(finder);
+						}
+					}
+				}
+			} else {
+				setMapa(x / 50, y / 50, 0);
+			}
+		}
+	}
+	
+	public synchronized void deleteTorre(int x, int y, PathFinder finder, ArrayList<Torre> torres, ArrayList<Monstro> monstros, Torre t) {
+		setMapa(x / 50, y / 50, 0);
+		HUD.getInstancia().addRecursos(torres.get(torres.indexOf(t)).getVendaCusto());
+		torres.remove(t);
+		for (Monstro m : monstros) {
+			m.atualizarCaminho(finder);
+		}
 	}
 }

@@ -29,6 +29,7 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 	// Controle de FPS pelo thread
 	private int FPS = 60;
 	private long targetTime = 1000 / FPS;
+	public static int FRAMES;
 
 	// Imagem (NAO MEXER)
 	private BufferedImage image;
@@ -73,7 +74,8 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 	public void run() {
 
 		init();
-
+		FRAMES = FPS;
+		double lastFrame = 0.0;
 		long start;
 		long elapsed;
 		long wait;
@@ -91,6 +93,7 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 
 			wait = targetTime - elapsed / 1000000;
 			deltaTime = wait;
+			lastFrame += deltaTime/1000;
 			if (wait < 0)
 				wait = 5;
 
@@ -98,6 +101,11 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 				Thread.sleep(wait);
 			} catch (Exception e) {
 				e.printStackTrace();
+			}
+			
+			if(lastFrame >= 1) {
+				FRAMES = (int) (1000 / wait);
+				lastFrame = 0.0;
 			}
 		}
 	}
@@ -110,6 +118,8 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 	// Desenha as informações na tela
 	private void draw() {
 		gsm.draw(g);
+		g.setFont(new Font("Arial", Font.PLAIN, 15));
+		g.drawString(String.valueOf(Renderer.FRAMES), 5, this.HEIGHT);
 	}
 
 	// Mostra a imagem gerada pelo draw()
@@ -133,5 +143,21 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 	
 	public void mouseClicked(MouseEvent e) {
 		gsm.mouseClicked(e);
+	}
+	
+	public void mousePressed(MouseEvent e) {
+		gsm.mousePressed(e);
+	}
+	
+	public void mouseReleased(MouseEvent e) {
+		gsm.mouseReleased(e);
+	}
+	
+	public void mouseMoved(MouseEvent e) {
+		gsm.mouseMoved(e);
+	}
+	
+	public void mouseDragged(MouseEvent e) {
+		gsm.mouseDragged(e);
 	}
 }

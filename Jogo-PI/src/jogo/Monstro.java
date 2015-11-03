@@ -5,6 +5,7 @@
 package jogo;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 import javax.swing.JComponent;
 
@@ -16,11 +17,13 @@ public abstract class Monstro extends JComponent {
 	// HP do monstro
 	private int vida, vidaMax;
 	private int recurso;
-	// Posiçao e espaços na matriz
+	// Posiçao e espaços na mapa
 	private double posicaoX, posicaoY;
 	private double speed;
+	private int tipo;
 	// Imagem do monstro
 	private Rectangle imagem;
+	private Rectangle lifeBar;
 	// Define prioridade no movimento
 	private int mover;
 	// Caminho a ser percorrido
@@ -35,22 +38,40 @@ public abstract class Monstro extends JComponent {
 	private static final int ESQUERDA = 2;
 	private static final int DIREITA = 3;
 	// Verifica status do monstro
-	private boolean slow;
+	private double slowValue;
+	private int slowQntd;
 	private boolean morto;
 	private boolean foraDaTela;
 	
 	//Construtor
-	public Monstro(int x, int vida, int recurso) {
+	public Monstro(int tipo, int x, int vida, int recurso) {
+		this.tipo = tipo;
 		this.imagem = new Rectangle(new Dimension(10, 20));
 		this.posicaoX = (int) (-49) + (25 - getImagem().getWidth() / 2);
 		this.posicaoY = (int) (650 / 13 * 6) + (25 - getImagem().getHeight() / 2);
+		this.vidaMax = vida;
 		this.vida = vida;
 		this.recurso = recurso;
 		this.mover = x;
 		this.direcao = DIREITA;
 		this.speed = 1;
+		this.lifeBar = new Rectangle((int) posicaoX, (int) posicaoY, 10, 5);
 		setBounds(imagem);
 	}
+	public int getTipo() {
+		return tipo;
+	}
+	public void setSlowValue(double x) {
+		this.slowValue = x;
+	}
+	public void addSlowQntd() {
+		slowQntd++;
+	}
+	
+	public double getSlowValue() {
+		return slowValue;
+	}
+	
 	// Retorna vida atual do monstro
 	public int getVida() {
 		return vida;
@@ -114,22 +135,31 @@ public abstract class Monstro extends JComponent {
 		}
 		return foraDaTela;
 	}
+	 public void draw(Graphics2D g) {
+		 g.setColor(Color.gray);
+		 g.fillRect((int) (getPosicaoX()), (int) (getPosicaoY()), (int) getImagem().getWidth(), (int) getImagem().getHeight());
+		 g.setColor(Color.RED);
+		 g.fill(lifeBar);
+	}
+	 
 	// Atualiza informações do monstro
 	public void update(PathFinder finder) {
-		this.andar();
-		if (!slow) {
-
+		andar();
+		if (slowQntd != 0) {
+			this.speed = 1 - slowValue;
 		} else {
-
+			this.speed = 1;
 		}
+		slowQntd = 0;
 		this.atualizarCaminho(finder);
 	}
 	// Atualiza posicao atual do monstro
 	// Usa o caminho como referencia
 	private void andar() {
+		setBounds((int) posicaoX, (int) posicaoY, imagem.width, imagem.height);
 		// Distancias da posicao atual até o próximo tile
-		double distX = (this.caminho.getX(index) * 50) + (25 - getImagem().getWidth() / 2) - this.posicaoX;
-		double distY = (this.caminho.getY(index) * 50) + (25 - getImagem().getHeight() / 2) - this.posicaoY;
+		double distX = (this.caminho.getX(index) * 50) + (25 - getImagem().getWidth()/2) - this.posicaoX;
+		double distY = (this.caminho.getY(index) * 50) + (25 - getImagem().getHeight()/2) - this.posicaoY;
 
 		// Caso a distancia seje menor que 1, pega proximo tile da lista
 		if ((Math.abs(distX) + Math.abs(distY)) < 1) {
@@ -140,5 +170,16 @@ public abstract class Monstro extends JComponent {
 		double angulo = Math.atan2(distY, distX);
 		this.posicaoX += 50 * (Math.cos(angulo) * Renderer.deltaTime/1000) * this.speed;
 		this.posicaoY += 50 * (Math.sin(angulo) * Renderer.deltaTime/1000) * this.speed;
+		
+		angulo = Math.toDegrees(Math.atan2(distY, distX));
+		
+		if(angulo >= -45 && angulo <= 45)
+			direcao = DIREITA;
+		else if(angulo > 45 && angulo <= 135)
+			direcao = BAIXO;
+		else if(angulo < -45 && angulo > -135)
+			direcao = CIMA;
+		else
+			direcao = ESQUERDA;
 	}
 }

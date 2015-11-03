@@ -7,9 +7,11 @@ package GameStates;
 import funcional.*;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import javax.swing.plaf.basic.BasicTabbedPaneUI.MouseHandler;
@@ -20,15 +22,26 @@ import jogo.*;
 public class PlayState extends GameState {
 	// Informaçoes do mapa
 	private Mapa mapa;
-
+	
 	// Objetos do jogo
 	private ArrayList<Torre> torres;
 	private ArrayList<Monstro> monstros;
-
+	private ArrayList<Tiro> tiros;
+	// Lista de compra das torres
+	private ArrayList<Torre> listaTorres;
+	
 	// Informaçao de wave, recursos, etc
 	private HUD hud;
 	private Wave wave;
 	
+	private boolean placingTorre;
+	private int selecionado;
+	private Torre aux;
+	private int selecionadoX;
+	private int selecionadoY;
+	
+	private int mouseX;
+	private int mouseY;
 	// Caminho a ser percorrido
 	private PathFinder finder;
 	private Path pathT;
@@ -51,7 +64,8 @@ public class PlayState extends GameState {
 		mapa = new Mapa(); // Cria mapa
 		torres = new ArrayList<Torre>(); // Cria a lista para torres
 		monstros = new ArrayList<Monstro>(); // Cria lista para monstros
-		wave = new Wave();
+		tiros = new ArrayList<Tiro>();
+		wave = new Wave(true);
 		hud = HUD.getInstancia(); // Cria a hud
 
 		// bgMusic = new Audio("/Audio/JogoBG.mp3");
@@ -63,6 +77,14 @@ public class PlayState extends GameState {
 
 		pathT = finder.findPath(2, 0, 6, 18, 6);
 		pathV = finder.findPath(3, 0, 6, 18, 6);
+		
+		this.selecionado = 0;	
+		
+		int MAX_TORRES = 3;
+		listaTorres = new ArrayList<Torre>();
+		listaTorres.add(new TorreTerrestre(Renderer.WIDTH/2 - (100 * MAX_TORRES) + (listaTorres.size()+1) * (MAX_TORRES * 50), Renderer.HEIGHT - 50));
+		listaTorres.add(new TorreVoador(Renderer.WIDTH/2 - (100 * MAX_TORRES) + (listaTorres.size()+1) * (MAX_TORRES * 50), Renderer.HEIGHT - 50));
+		listaTorres.add(new TorreSuporte(Renderer.WIDTH/2 - (100 * MAX_TORRES) + (listaTorres.size()+1) * (MAX_TORRES * 50), Renderer.HEIGHT - 50));
 	}
 
 	private void monstroUpdate() {
@@ -76,22 +98,7 @@ public class PlayState extends GameState {
 	
 	private void torreUpdate() {
 		for(Torre t: torres) {
-			atacar(t.getX(), t.getY(), t);
-		}
-	}
-	
-	private void atacar(int x, int y, Torre t) {
-		Monstro m = t.calculateRange(this.monstros);
-		t.setTarget(m);
-		if(m == null) {
-		}
-		else {
-			if(t.getAtqTime() < t.getMaxAtqTime()) {
-				t.setAtqTime(t.getAtqTime()+0.02);
-			} else {
-				t.getTarget().subVida(t.getDano());
-				t.setAtqTime(0);
-			}
+			t.update(torres, monstros);
 		}
 	}
 	
@@ -106,10 +113,28 @@ public class PlayState extends GameState {
 	// Desenha na tela
 	public void draw(Graphics2D g) {
 		// Background (Temporario)
-		g.setColor(Color.black);
+		g.setColor(new Color(255, 211, 155));
 		g.fillRect(0, 0, 950, 650);
+
+		if(selecionado != 0) {
+			g.setColor(aux.getColor());
+			g.fillRect((int) aux.getImagem().getX(), (int)aux.getImagem().getY(), (int)aux.getImagem().getWidth(), (int)aux.getImagem().getHeight());
+		}
+		
 		// Mapa
 		mapa.draw(g);
+
+		// Desenha HuD
+		hud.draw(g);
+
+		for(Torre t : listaTorres) {
+			g.setColor(t.getColor());
+			g.fillRect((int) t.getImagem().getX(), (int) t.getImagem().getY(), (int) t.getImagem().getWidth(), (int) t.getImagem().getHeight());
+			g.setColor(Color.black);
+			g.setFont(new Font("Arial", Font.PLAIN, 30));
+			g.drawString(String.valueOf(t.getCusto()), t.getX() + 7, t.getY() + 37);
+		}
+		
 		if (debug) {
 			// Desenha caminho (Debug)
 			for (int x = 0; x < mapa.getWidthInTiles(); x++) {
@@ -128,25 +153,15 @@ public class PlayState extends GameState {
 					}
 				}
 			}
-			// Desenha range das torres (Debug)
-			for (Torre t : torres) {
-				g.setColor(Color.CYAN);
-				g.fillOval(t.getX() - t.getRange() + t.getWidth() / 2, t.getY() - t.getRange() + t.getHeight() / 2, t.getRange() * 2, t.getRange() * 2);
-			}
 		}
 		// Desenha torres
 		for (Torre t : torres) {
-			g.setColor(t.getColor());
-			g.fillRect(t.getImagem().x, t.getImagem().y, t.getImagem().width, t.getImagem().height);
+			t.draw(g);
 		}
 		// Desenha Monstros
 		for (Monstro m : monstros) {
-			g.setColor(Color.gray);
-			g.fillRect((int) (m.getPosicaoX()), (int) (m.getPosicaoY()), (int) m.getImagem().getWidth(), (int) m.getImagem().getHeight());
+			m.draw(g);
 		}
-
-		// Desenha HuD
-		hud.draw(g);
 	}
 
 	@Override
@@ -162,69 +177,82 @@ public class PlayState extends GameState {
 	}
 
 	public void mouseDragged(MouseEvent e) {
-		// System.out.println("Arastou");
+		if(selecionado != 0) {
+			selecionadoX = e.getX() / 50 * 50;
+			selecionadoY = e.getY() / 50 * 50;
+			aux.getImagem().x = selecionadoX;
+			aux.getImagem().y = selecionadoY;
+		}
 	}
 
 	public void mouseMoved(MouseEvent e) {
-		// System.out.println(e.getX() + " " + e.getY());
+		mouseX = e.getX();
+		mouseY = e.getY();
 	}
 
 	public void mouseClicked(MouseEvent e) {
 		int x = e.getX() / 50 * 50;
 		int y = e.getY() / 50 * 50;
+		
 		ArrayList<Torre> aux = (ArrayList<Torre>) torres.clone();
 
 		for (Torre t : aux) {
 			if (t.getBounds().contains(e.getX(), e.getY())) {
+				if (e.getButton() == MouseEvent.BUTTON2) {
+					t.upgrade();
+				}
 				if (e.getButton() == MouseEvent.BUTTON3) {
-					mapa.setMapa(x / 50, y / 50, 0);
-					hud.addRecursos(torres.get(torres.indexOf(t)).getCusto());
-					torres.remove(t);
-					for (Monstro m : monstros) {
-						m.atualizarCaminho(finder);
+					mapa.deleteTorre(x, y, finder, torres, monstros, t);
+
+					if(debug) {
+						pathT = finder.findPath(2, 0, 6, 18, 6);
+						pathV = finder.findPath(3, 0, 6, 18, 6);
 					}
 				}
 			}
 		}
-
-		if (e.getButton() == MouseEvent.BUTTON1 && !mapa.placeTorre(x / 50, y / 50)) {
-			mapa.setMapa(x / 50, y / 50, 4);
-			if (finder.findPath(2, 0, 6, 18, 6) != null) {
-				torres.add(new TorreTerrestre(x, y));
-				hud.subRecursos(torres.get(torres.size()-1).getCusto());
-				if(hud.getRecursos() < 0) {
-					torres.remove(torres.size() - 1);
-					hud.addRecursos(torres.get(torres.size()-1).getCusto());
-					mapa.setMapa(x / 50, y / 50, 0);
-				} else {
-					for (Monstro m : monstros) {
-						m.atualizarCaminho(finder);
-						if (!m.hasCaminho()) {
-							hud.addRecursos(torres.get(torres.size() - 1).getCusto());
-							mapa.setMapa(x / 50, y / 50, 0);
-							torres.remove(torres.size() - 1);
-							m.atualizarCaminho(finder);
-						}
-					}
-				}
-			} else {
-				mapa.setMapa(x / 50, y / 50, 0);
-			}
-		}
-
-		pathT = finder.findPath(2, 0, 6, 18, 6);
-		pathV = finder.findPath(3, 0, 6, 18, 6);
 	}
 
 	public void mousePressed(MouseEvent e) {
 		int x = e.getX() / 50 * 50;
 		int y = e.getY() / 50 * 50;
+
+		for(Torre t : listaTorres) {
+			if(t.getBounds().contains(e.getX(), e.getY())) {
+				selecionadoX = e.getX();
+				selecionadoY = e.getY();
+				
+				selecionado = t.getTipo();
+				switch(t.getTipo()) {
+					case 4:
+						aux = new TorreTerrestre();
+						break;
+					case 5:
+						aux = new TorreVoador();
+						break;
+					case 6:
+						aux = new TorreSuporte();
+						break;
+				}
+				placingTorre = true;
+			}
+		}
 	}
 
 	public void mouseReleased(MouseEvent e) {
 		int x = e.getX() / 50 * 50;
 		int y = e.getY() / 50 * 50;
-		// System.out.println("Soltou");
+		
+		if(selecionado != 0) {
+			mapa.placeTorre(selecionado, x, y, finder, torres, monstros);
+			selecionado = 0;
+			aux = null;
+			
+			if(debug) {
+				pathT = finder.findPath(2, 0, 6, 18, 6);
+				pathV = finder.findPath(3, 0, 6, 18, 6);
+			}
+		}
 	}
 
 }
