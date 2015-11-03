@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.MouseInfo;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -22,11 +23,15 @@ import jogo.*;
 public class PlayState extends GameState {
 	// Informaçoes do mapa
 	private Mapa mapa;
+	private boolean hardcore;
+	
+	//
+	private GameStateManager gsm;
 	
 	// Objetos do jogo
 	private ArrayList<Torre> torres;
 	private ArrayList<Monstro> monstros;
-	private ArrayList<Tiro> tiros;
+	
 	// Lista de compra das torres
 	private ArrayList<Torre> listaTorres;
 	
@@ -47,6 +52,9 @@ public class PlayState extends GameState {
 	private Path pathT;
 	private Path pathV;
 
+	private Rectangle speedBotao;
+	public static int gameSpeed;
+	
 	// Musica de fundo
 	private Audio bgMusic;
 
@@ -54,8 +62,11 @@ public class PlayState extends GameState {
 	private boolean debug = false;
 	
 	// Consturtor
-	public PlayState(GameStateManager gsm) {
+	public PlayState(GameStateManager gsm, boolean hc) {
 		this.gsm = gsm;
+		this.hardcore = hc;
+		this.gameSpeed = 1;
+		this.speedBotao = new Rectangle(0, Renderer.HEIGHT - 50, 50, 50);
 		init();
 	}
 
@@ -64,9 +75,9 @@ public class PlayState extends GameState {
 		mapa = new Mapa(); // Cria mapa
 		torres = new ArrayList<Torre>(); // Cria a lista para torres
 		monstros = new ArrayList<Monstro>(); // Cria lista para monstros
-		tiros = new ArrayList<Tiro>();
-		wave = new Wave(true);
-		hud = HUD.getInstancia(); // Cria a hud
+		
+		wave = new Wave(hardcore);
+		hud = HUD.getInstancia(gsm); // Cria a hud
 
 		// bgMusic = new Audio("/Audio/JogoBG.mp3");
 		// bgMusic.play();
@@ -108,6 +119,7 @@ public class PlayState extends GameState {
 		hud.update();
 		torreUpdate();
 		monstroUpdate();
+		
 	}
 
 	// Desenha na tela
@@ -127,6 +139,19 @@ public class PlayState extends GameState {
 		// Desenha HuD
 		hud.draw(g);
 
+		switch(gameSpeed) {
+			case 1:
+				g.setColor(Color.GREEN);
+				break;
+			case 3:
+				g.setColor(Color.YELLOW);
+				break;
+			case 5:
+				g.setColor(Color.red);
+				break;
+		}
+		g.fillRect(speedBotao.x, speedBotao.y, speedBotao.width, speedBotao.height);
+		
 		for(Torre t : listaTorres) {
 			g.setColor(t.getColor());
 			g.fillRect((int) t.getImagem().getX(), (int) t.getImagem().getY(), (int) t.getImagem().getWidth(), (int) t.getImagem().getHeight());
@@ -211,6 +236,12 @@ public class PlayState extends GameState {
 				}
 			}
 		}
+		
+		if(speedBotao.getBounds().contains(e.getPoint())) {
+			gameSpeed += 2;
+			if(gameSpeed > 5)
+				gameSpeed = 1;
+		}
 	}
 
 	public void mousePressed(MouseEvent e) {
@@ -254,5 +285,4 @@ public class PlayState extends GameState {
 			}
 		}
 	}
-
 }

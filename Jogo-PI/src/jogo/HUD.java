@@ -4,6 +4,9 @@ import java.awt.*;
 
 import javax.swing.JLabel;
 
+import GameStates.GameState;
+import GameStates.GameStateManager;
+
 public class HUD {
 	private int recursos;
 	private int wave;
@@ -16,6 +19,7 @@ public class HUD {
 	private boolean griding;
 	private boolean gameOver;
 	private Font font;
+	private GameStateManager gsm;
 	
 	private HUD() {
 		wave = 1;
@@ -23,6 +27,12 @@ public class HUD {
 		vidas = 20;
 		font = new Font("Arial", Font.PLAIN, 25);	
 		griding = true;	
+		this.gsm = gsm;
+	}
+	
+	private HUD(GameStateManager gsm) {
+		this();
+		this.gsm = gsm;
 	}
 	
 	public static HUD getInstancia() {
@@ -32,10 +42,31 @@ public class HUD {
 		return instancia;
 	}
 	
+	public static HUD getInstancia(GameStateManager gsm) {
+		if(instancia == null) {
+			initInstancia(gsm);
+		}
+		return instancia;
+	}
+	
 	private static synchronized void initInstancia() {
 		if(instancia == null) {
 			instancia = new HUD();
 		}
+	}
+	
+	private static synchronized void initInstancia(GameStateManager gsm) {
+		if(instancia == null) {
+			instancia = new HUD(gsm);
+		}
+	}
+	
+	private void reset() {
+		wave = 1;
+		recursos = 30000;
+		vidas = 20;
+		font = new Font("Arial", Font.PLAIN, 25);	
+		griding = true;	
 	}
 	
 	public int getRecursos() {
@@ -82,6 +113,11 @@ public class HUD {
 		sRecursos = "Recursos : " + String.format("%06d", recursos);
 		sWave = "Wave : " + String.format("%03d", wave);
 		sVidas = "Vidas : " + String.format("%02d", vidas);
+		
+		if(vidas <= 0) {
+			reset();
+			gsm.setState(GameStateManager.MENU);
+		}
 	}
 	
 	public void draw(Graphics2D g) {

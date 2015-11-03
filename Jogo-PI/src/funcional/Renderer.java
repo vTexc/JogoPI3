@@ -118,6 +118,7 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 	// Desenha as informações na tela
 	private void draw() {
 		gsm.draw(g);
+		g.setColor(Color.BLACK);
 		g.setFont(new Font("Arial", Font.PLAIN, 15));
 		g.drawString(String.valueOf(Renderer.FRAMES), 5, this.HEIGHT);
 	}

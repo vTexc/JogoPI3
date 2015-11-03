@@ -12,6 +12,7 @@ import javax.swing.JComponent;
 import funcional.Janela;
 import funcional.Renderer;
 import AEstrela.*;
+import GameStates.PlayState;
 
 public abstract class Monstro extends JComponent {
 	// HP do monstro
@@ -168,8 +169,8 @@ public abstract class Monstro extends JComponent {
 		
 		// Calcula a direcao atual
 		double angulo = Math.atan2(distY, distX);
-		this.posicaoX += 50 * (Math.cos(angulo) * Renderer.deltaTime/1000) * this.speed;
-		this.posicaoY += 50 * (Math.sin(angulo) * Renderer.deltaTime/1000) * this.speed;
+		this.posicaoX += (50 * (Math.cos(angulo) * Renderer.deltaTime/1000) * this.speed) * PlayState.gameSpeed;
+		this.posicaoY += (50 * (Math.sin(angulo) * Renderer.deltaTime/1000) * this.speed) * PlayState.gameSpeed;
 		
 		angulo = Math.toDegrees(Math.atan2(distY, distX));
 		

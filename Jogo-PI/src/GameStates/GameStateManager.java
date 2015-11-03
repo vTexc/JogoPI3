@@ -20,7 +20,8 @@ public class GameStateManager {
 	// Gerenciar os estados
 	private GameState[] gameStates;
 	private int currentState;
-
+	private boolean hc;
+	
 	//Numero maximo de estados
 	//Define todos os estados que o jogo pode ter
 	public static final int NUMSTATES = 4;
@@ -33,7 +34,7 @@ public class GameStateManager {
 	public GameStateManager() {
 		gameStates = new GameState[NUMSTATES];
 
-		currentState = PLAY;
+		currentState = MENU;
 		loadState(currentState);
 	}
 
@@ -46,7 +47,7 @@ public class GameStateManager {
 		if(state == CREDITS)
 			gameStates[state] = new CreditState(this);
 		if(state == PLAY)
-			gameStates[state] = new PlayState(this);
+			gameStates[state] = new PlayState(this, this.hc);
 	}
 	
 	//Descarrega determinado estado
@@ -56,6 +57,13 @@ public class GameStateManager {
 	
 	//Seleciona determinado estado
 	public void setState(int state) {
+		unloadState(currentState);
+		currentState = state;
+		loadState(currentState);
+	}
+	
+	public void setState(int state, boolean hc) {
+		this.hc = hc;
 		unloadState(currentState);
 		currentState = state;
 		loadState(currentState);

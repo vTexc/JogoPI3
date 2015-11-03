@@ -1,6 +1,3 @@
-/*
- * Tela de menu
- */
 package GameStates;
 
 import java.awt.*;
@@ -8,16 +5,18 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 import funcional.Audio;
+import funcional.Renderer;
 
 public class MenuState extends GameState {
 	
-	private int currentChoice = 0;
-	private String[] options = {
-		"Start",
-		"Help",
-		"Quit"
-	};
+	private int currentChoice;
+
+	private Rectangle[] botao;
+	private String[] options = {"Start", "", "", "Quit", "Hardcore", "Normal"};
 	
+	private boolean start;
+	
+	private static final int NUMBOTAO = 4;
 	private Font titleFont;
 	
 	private Font font;
@@ -27,6 +26,13 @@ public class MenuState extends GameState {
 	public MenuState(GameStateManager gsm) {
 		
 		this.gsm = gsm;
+		this.start = false;
+		this.currentChoice = -1;
+		botao = new Rectangle[NUMBOTAO];
+		
+		for(int x = 0; x < botao.length; x++) {
+			botao[x] = new Rectangle(950/2 - 100, 650/2 + x*60, 200,50);
+		}
 		
 		try {
 			titleFont = new Font(
@@ -47,11 +53,11 @@ public class MenuState extends GameState {
 	
 	public void init() {}
 	
-	public void update() {
-	}
+	public void update() {}
 	
 	public void draw(Graphics2D g) {
-		
+		g.setColor(Color.BLACK);
+		g.fillRect(0, 0, Renderer.WIDTH, Renderer.HEIGHT);
 		// draw title
 		g.setColor(Color.WHITE);
 		g.setFont(titleFont);
@@ -59,78 +65,90 @@ public class MenuState extends GameState {
 		
 		// draw menu options
 		g.setFont(font);
-		for(int i = 0; i < options.length; i++) {
-			if(i == currentChoice) {
-				g.setColor(Color.WHITE);
+		if (!start) {
+			for (int i = 0; i < botao.length; i++) {
+				if (i == currentChoice) {
+					g.setColor(Color.WHITE);
+				} else {
+					g.setColor(Color.RED);
+				}
+				g.draw(botao[i]);
+				g.drawString(options[i],botao[i].x, botao[i].y + font.getSize());
 			}
-			else {
-				g.setColor(Color.RED);
+		} else {
+			for (int i = 1; i < botao.length - 1; i++) {
+				if (i == currentChoice) {
+					g.setColor(Color.WHITE);
+				} else {
+					g.setColor(Color.RED);
+				}
+				g.draw(botao[i]);
+				g.drawString(options[options.length - i], botao[i].x, botao[i].y + font.getSize());
 			}
-			g.drawString(options[i], 950/2 - font.getSize(), 650/2 + i * font.getSize());
 		}
 		
-	}
-	
-	private void select() {
-		if(currentChoice == 0) {
-//			bgMusic.stop();
-			gsm.setState(GameStateManager.PLAY);
-		}
-		if(currentChoice == 1) {
-			// help
-		}
-		if(currentChoice == 2) {
-			bgMusic.stop();
-			System.exit(0);
-		}
 	}
 	
 	public void keyPressed(int k) {
-		if(k == KeyEvent.VK_ENTER){
-			select();
-		}
-		if(k == KeyEvent.VK_UP) {
-			currentChoice--;
-			if(currentChoice == -1) {
-				currentChoice = options.length - 1;
-			}
-		}
-		if(k == KeyEvent.VK_DOWN) {
-			currentChoice++;
-			if(currentChoice == options.length) {
-				currentChoice = 0;
-			}
-		}
 	}
-	public void keyReleased(int k) {
-		
-	}
+	
+	public void keyReleased(int k) {}
 
-	@Override
 	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+		if(e.getButton() == MouseEvent.BUTTON1) {
+			switch(currentChoice) {
+				case 0:
+					if(!start)
+						start = true;
+					break;
+				case 1:
+					if(!start) {
+						
+					} else {
+						gsm.setState(GameStateManager.PLAY, false);
+					}
+					break;
+				case 2:
+					if(!start) {
+						
+					} else {
+						gsm.setState(GameStateManager.PLAY, true);
+					}
+					break;
+				case 3:
+					if(!start)
+						System.exit(0);
+					break;
+			}
+		}
+		if(e.getButton() == MouseEvent.BUTTON2) {
+			
+		}
+		if(e.getButton() == MouseEvent.BUTTON3) {
+			
+		}
 	}
 
-	@Override
 	public void mousePressed(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
 	public void mouseMoved(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+		for(int i = 0; i < botao.length; i++) {
+			if(botao[i].contains(e.getPoint())) {
+				currentChoice = i;
+				return;
+			}
+		}
+		currentChoice = -1;
 	}
 
-	@Override
 	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
 		

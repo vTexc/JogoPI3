@@ -4,6 +4,7 @@ import java.util.*;
 
 import funcional.Renderer;
 import AEstrela.*;
+import GameStates.PlayState;
 
 public class Wave {
 	private double spawn;
@@ -15,7 +16,6 @@ public class Wave {
 	private double tempoAtual;
 	
 	private boolean gerar;
-	private boolean hardcore;
 	
 	public Wave() {
 		this.spawn = 1;
@@ -29,15 +29,15 @@ public class Wave {
 	
 	public Wave(boolean hardcore) {
 		this();
-		this.hardcore = true;
-		this.tempoEspera = 0;
+		if(hardcore)
+			this.tempoEspera = 0;
 	}
 	
 	public void update(ArrayList<Monstro> monstros, PathFinder finder, HUD hud) {
 		if (gerar) {
 			if (qtdMonstros < maxMonstros) {
 				if (spawn < 1) {
-					spawn += Renderer.deltaTime/1000;
+					spawn += Renderer.deltaTime/1000 * PlayState.gameSpeed;
 				} else {
 					qtdMonstros++;
 					monstros.add(new MonstroTerrestre());

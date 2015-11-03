@@ -4,6 +4,7 @@ import java.awt.*;
 
 import javax.swing.*;
 
+import GameStates.PlayState;
 import funcional.Renderer;
 
 public class Tiro extends JComponent {
@@ -110,8 +111,8 @@ public class Tiro extends JComponent {
 
 		double angulo = Math.atan2(dy, dx);
 
-		this.x += 500 * (Math.cos(angulo) * Renderer.deltaTime / 1000);
-		this.y += 500 * (Math.sin(angulo) * Renderer.deltaTime / 1000);
+		this.x += (500 * (Math.cos(angulo) * Renderer.deltaTime / 1000)) * PlayState.gameSpeed;
+		this.y += (500 * (Math.sin(angulo) * Renderer.deltaTime / 1000)) * PlayState.gameSpeed;
 	}
 
 	public void draw(Graphics2D g) {
