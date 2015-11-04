@@ -13,28 +13,33 @@ import javax.swing.*;
 import funcional.Mouse;
 
 public abstract class Torre extends JComponent implements Mouse {
-	// Hp da torre
+	// Vida da torre
 	private int vida, vidaMax;
 	// Status da torre
-	private int rangeBase;
-	private int range;
-	private int rangeAtual;
+	// Raio de ataque
+	private int rangeBase; // Base
+	private int range; // 
+	private int rangeAtual; // Atual
+	// Level da torre
 	private int upgrade;
-	
+	// Custo de venda
 	private int vendaCusto;
+	// Custo de compra
 	private int custo;
+	// Custo de upgrade
 	private int upgradeCusto;
-	
+	// Tipo (Terrestre, Voador, Destruidor)
 	private int tipo;
-
+	// Verifica se mouse esta sobre esta torre
+	private boolean mouseOver;
 	// Imagem
 	private Rectangle imagem;
 	private Color color;
 	
-	// Construtor
+	// Construtor usando todas as informações
 	public Torre(int tipo, int x, int y, int custo, int range, Color cor) {
 		this.tipo = tipo;
-		this.setImagem(new Rectangle(x, y, 50, 50));
+		this.imagem = new Rectangle(x, y, 50, 50);
 		this.color = cor;
 		this.rangeBase = range;
 		this.range = range;
@@ -45,156 +50,102 @@ public abstract class Torre extends JComponent implements Mouse {
 		this.upgradeCusto = custo + custo * (upgrade+1);
 		setBounds(imagem);
 	}
-	
+	// Construtor para compra
 	public Torre(int tipo, double x, double y, int custo, Color cor) {
 		this.tipo = tipo;
 		this.color = cor;
 		this.custo = custo;
-		this.setImagem(new Rectangle((int) x, (int) y, 50, 50));
+		this.imagem = new Rectangle((int) x, (int) y, 50, 50);
 		setBounds(imagem);
 	}
-	
+	// Construtor para lista de compra
 	public Torre(int tipo, Color cor) {
 		this.tipo = tipo;
-		this.setImagem(new Rectangle(50, 50));
+		this.imagem = new Rectangle(50, 50);
 		setBounds(imagem);
 		this.color = cor;
 	}
-	
-	public int getTipo() {
-		return tipo;
-	}
-	
-	public int getUpgradeCusto() {
-		return upgradeCusto;
-	}
-	
-	public int getVendaCusto() {
-		return vendaCusto;
-	}
-	
 	// Retorna cor (Temporario)
 	public Color getColor() {
 		return color;
-	}
-	// Retorna vida atual da torre
-	public int getVida() {
-		return vida;
-	}
-	// altera vida atual da torre
-	public void setVida(int vida) {
-		this.vida = vida;
 	}
 	// Retorna imagem da torre
 	public Rectangle getImagem() {
 		return imagem;
 	}
-	// Altera imagem da torre
-	public void setImagem(Rectangle imagem) {
-		this.imagem = imagem;
+	// Retorna tipo da torre
+	public int getTipo() {
+		return tipo;
 	}
-	
-	// Retorna o dano da torre
-	public int getDanoAtual() {
-		return 0;
+	// Retorna custo de compra
+	public int getCusto() {
+		return custo;
 	}
-	
-	public void setDanoAtual(int danoAtual) {}
-	
-	// Retorna rage da torre
-	public int getRangeAtual() {
-		return rangeAtual;
+	// Retorna custo de upgrade
+	public int getUpgradeCusto() {
+		return upgradeCusto;
 	}
-
+	// Altera custo de upgrade
+	public void setUpgradeCusto(int custo) {
+		this.upgradeCusto = custo;
+	}
+	// Retorna custo de venda
+	public int getVendaCusto() {
+		return vendaCusto;
+	}
+	// Altera custo de venda
+	public void setVendaCusto(int custo) {
+		this.vendaCusto = custo;
+	}
+	// Retorna range base
 	public int getRangeBase() {
 		return rangeBase;
 	}
-	
+	// Retorna range
+	public int getRange() {
+		return range;
+	}
+	// Altera range
+	public void setRange(int range) {
+		this.range = range;
+	}
+	// Retorna range atual
+	public int getRangeAtual() {
+		return rangeAtual;
+	}
 	// Altera range da torre
 	public void setRangeAtual(int range) {
 		this.rangeAtual = range;
 	}
-	
-	public int getRange() {
-		return range;
+	// Retorna upgrade
+	public int getUpgrade() {
+		return upgrade;
 	}
-
-	public void setRange(int range) {
-		this.range = range;
+	// Aumenta upgrade
+	public void addUpgrade() {
+		upgrade++;
 	}
-
-	public int getDano() {
-		return 0;
-	}
-
-	public void setDano(int dano) {}
-	
+	// Verifica se da para dar upgrade
 	public boolean isUpgradable() {
 		if(upgrade < 6)
 			return true;
 		else
 			return false;
 	}
-	
-	public double getAtqTime() {
-		return 0;
+	// Seta true caso mouse esteja sobre a torre
+	public void setMouseOver(boolean x) {
+		this.mouseOver = x;
 	}
-	
-	public void setAtqTime(double atqTime) {}
-	
-	public double getMaxAtqTime() {
-		return 0;
-	}
-	
-	public void setMaxAtqTime(double maxAtqTime) {}
-	
-	public int getCusto() {
-		return custo;
-	}
-
-	public void setUpgradeCusto(int upgradeCusto) {
-		this.upgradeCusto = upgradeCusto;
-	}
-	
-	public void setVendaCusto(int upgradeCusto) {
-		this.vendaCusto = upgradeCusto;
-	}
-	
-	public double getSuporteValue() {
-		return 0;
-	}
-	
-	public void setSuporteValue(double x) {}
-	
-	public void addSuporteQntd() {}
-	
-	public int getSuporteQntd() {
-		return 0;
-	}
-	
-	public void setSuporteQntd(int suporteQntd) {}
-	
-	public int getUpgrade() {
-		return upgrade;
-	}
-	
-	public void addUpgrade() {
-		upgrade++;
-	}
-	
-	public boolean isMouseOver(int x, int y) {
-		if(getBounds().contains(x, y)) {
-			return true;
-		}
-		return false;
-	}
-	
+	// Desenha a torre na tela
 	public void draw(Graphics2D g) {
 		g.setColor(getColor());
 		g.fillRect(getImagem().x +5, getImagem().y+5, getImagem().width-10, getImagem().height-10);
-	
+		// Desenha range e informações de compra e venda
+		// Caso mouse esteja sobre a torre
+		if(mouseOver) {
 			g.setColor(new Color(0.5f, 0.5f, 0.5f, 0.2f));
-			g.fillOval(getX() - getRangeAtual() + getWidth() / 2, getY() - getRangeAtual() + getHeight() / 2, getRangeAtual() * 2, getRangeAtual() * 2);
+			g.fillOval(getX() - rangeAtual + getWidth() / 2, getY() - rangeAtual + getHeight() / 2, rangeAtual * 2, rangeAtual * 2);
+			// Se der para dar upgrade, mostrar o valor de upgrade
 			if(isUpgradable()) {
 				g.setColor(Color.black);
 				g.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -205,12 +156,17 @@ public abstract class Torre extends JComponent implements Mouse {
 			g.setFont(new Font("Arial", Font.PLAIN, 20));
 			g.drawString(String.valueOf(getVendaCusto()), getX() + 13, getY() + 80);
 			g.drawString("Venda", getX(), getY() + 100);
-
+		}
+		g.setColor(Color.black);
 		g.setFont(new Font("Arial", Font.PLAIN, 50));
-		g.drawString(String.valueOf(getUpgrade()), getX() + 10, getY() + 45);
+		g.drawString(String.valueOf(upgrade), getX() + 10, getY() + 45);
 	}
-	
-	public abstract boolean upgrade();
-	public abstract void update(ArrayList<Torre> torres, ArrayList<Monstro> monstros);	
+	// Metodos abstratos
+	public abstract int getDanoAtual();
+	public abstract double getSuporteValue();
+	public abstract void setSuporteValue(double x);
+	public abstract void setSuporte(boolean suporte);
 	public abstract void calculateRange(ArrayList<Monstro> monstros, ArrayList<Torre> torres);
+	public abstract boolean upgrade();
+	public abstract void update(ArrayList<Torre> torres, ArrayList<Monstro> monstros);
 }

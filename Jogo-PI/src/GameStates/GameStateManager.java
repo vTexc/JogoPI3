@@ -84,12 +84,12 @@ public class GameStateManager {
 	}
 	
 	/** Listeners **/
-	public void keyPressed(int k) {
-		gameStates[currentState].keyPressed(k);
+	public void mouseDragged(MouseEvent e) {
+		gameStates[currentState].mouseDragged(e);
 	}
 	
-	public void keyReleased(int k) {
-		gameStates[currentState].keyReleased(k);
+	public void mouseMoved(MouseEvent e) {
+		gameStates[currentState].mouseMoved(e);
 	}
 	
 	public void mouseClicked(MouseEvent e) {
@@ -104,11 +104,11 @@ public class GameStateManager {
 		gameStates[currentState].mouseReleased(e);
 	}
 	
-	public void mouseMoved(MouseEvent e) {
-		gameStates[currentState].mouseMoved(e);
+	public void mouseEntered(MouseEvent e) {
+		gameStates[currentState].mouseEntered(e);
 	}
-	
-	public void mouseDragged(MouseEvent e) {
-		gameStates[currentState].mouseDragged(e);
+
+	public void mouseExited(MouseEvent e) {
+		gameStates[currentState].mouseExited(e);
 	}
 }

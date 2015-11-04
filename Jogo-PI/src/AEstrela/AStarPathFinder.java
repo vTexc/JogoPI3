@@ -5,60 +5,37 @@ import java.util.*;
 import funcional.TileBasedMap;
 
 public class AStarPathFinder implements PathFinder {
-	/** The set of nodes that have been searched through */
-	private ArrayList closed = new ArrayList();
-	/** The set of nodes that we do not yet consider fully searched */
-	private SortedList open = new SortedList();
+	// Conjunto de nós explorados
+	private ArrayList fechado = new ArrayList();
+	// Conjunto de nós parcilamente explorados
+	private SortedList aberto = new SortedList();
+	// Mapa base da procura
+	private TileBasedMap mapa;
+	// Maximo de tiles para buscar
+	private int distanciaMaxima;
 
-	/** The map being searched */
-	private TileBasedMap map;
-	/** The maximum depth of search we're willing to accept before giving up */
-	private int maxSearchDistance;
-
-	/** The complete set of nodes across the map */
+	// Nós no mapa
 	private Node[][] nodes;
-	/** True if we allow diaganol movement */
-	private boolean allowDiagMovement;
-	/** The heuristic we're applying to determine which nodes to search first */
-	private AStarHeuristic heuristic;
+	// Permite diagonal ou não
+	private boolean movimentoDiagonal;
+	// Heuristica usada na A*
+	private AStarHeuristic heuristica;
 
-	/**
-	 * Create a path finder with the default heuristic - closest to target.
-	 * 
-	 * @param map
-	 *            The map to be searched
-	 * @param maxSearchDistance
-	 *            The maximum depth we'll search before giving up
-	 * @param allowDiagMovement
-	 *            True if the search should try diaganol movement
-	 */
-	public AStarPathFinder(TileBasedMap map, int maxSearchDistance,
-			boolean allowDiagMovement) {
-		this(map, maxSearchDistance, allowDiagMovement, new ClosestHeuristic());
+	// Construtor
+	public AStarPathFinder(TileBasedMap mapa, int distanciaMaxima, boolean movimentoDiagonal) {
+		this(mapa, distanciaMaxima, movimentoDiagonal, new ClosestHeuristic());
 	}
+	
+	// Construtor
+	public AStarPathFinder(TileBasedMap mapa, int distanciaMaxima, boolean movimentoDiagonal, AStarHeuristic heuristica) {
+		this.heuristica = heuristica;
+		this.mapa = mapa;
+		this.distanciaMaxima = distanciaMaxima;
+		this.movimentoDiagonal = movimentoDiagonal;
 
-	/**
-	 * Create a path finder
-	 * 
-	 * @param heuristic
-	 *            The heuristic used to determine the search order of the map
-	 * @param map
-	 *            The map to be searched
-	 * @param maxSearchDistance
-	 *            The maximum depth we'll search before giving up
-	 * @param allowDiagMovement
-	 *            True if the search should try diaganol movement
-	 */
-	public AStarPathFinder(TileBasedMap map, int maxSearchDistance,
-			boolean allowDiagMovement, AStarHeuristic heuristic) {
-		this.heuristic = heuristic;
-		this.map = map;
-		this.maxSearchDistance = maxSearchDistance;
-		this.allowDiagMovement = allowDiagMovement;
-
-		nodes = new Node[map.getWidthInTiles()][map.getHeightInTiles()];
-		for (int x = 0; x < map.getWidthInTiles(); x++) {
-			for (int y = 0; y < map.getHeightInTiles(); y++) {
+		nodes = new Node[mapa.getWidthInTiles()][mapa.getHeightInTiles()];
+		for (int x = 0; x < mapa.getWidthInTiles(); x++) {
+			for (int y = 0; y < mapa.getHeightInTiles(); y++) {
 				nodes[x][y] = new Node(x, y);
 			}
 		}
@@ -67,31 +44,24 @@ public class AStarPathFinder implements PathFinder {
 	/**
 	 * @see PathFinder#findPath(Mover, int, int, int, int)
 	 */
-	public Path findPath(int mover, int sx, int sy, int tx, int ty) {
-		// easy first check, if the destination is blocked, we can't get there
-
-		if (map.blocked(mover, tx, ty)) {
+	public Caminho findPath(int mover, int sx, int sy, int tx, int ty) {
+		// Verifica se o ponto final esta bloqueado ou não
+		if (mapa.blocked(mover, tx, ty)) {
 			return null;
 		}
+		// Inicializa variaveis para A*
+		nodes[sx][sy].custo = 0;
+		nodes[sx][sy].profundidade = 0;
+		fechado.clear();
+		aberto.clear();
+		aberto.add(nodes[sx][sy]);
 
-		// initial state for A*. The closed group is empty. Only the starting
+		nodes[tx][ty].parente = null;
 
-		// tile is in the open list and it'e're already there
-		nodes[sx][sy].cost = 0;
-		nodes[sx][sy].depth = 0;
-		closed.clear();
-		open.clear();
-		open.add(nodes[sx][sy]);
-
-		nodes[tx][ty].parent = null;
-
-		// while we haven'n't exceeded our max search depth
-		int maxDepth = 0;
-		while ((maxDepth < maxSearchDistance) && (open.size() != 0)) {
-			// pull out the first node in our open list, this is determined to
-
-			// be the most likely to be the next step based on our heuristic
-
+		// Enquanto não terminou a profundidade de busca
+		int profundidadeMaxima = 0;
+		while ((profundidadeMaxima < distanciaMaxima) && (aberto.size() != 0)) {
+			
 			Node current = getFirstInOpen();
 			if (current == nodes[tx][ty]) {
 				break;
@@ -99,59 +69,30 @@ public class AStarPathFinder implements PathFinder {
 
 			removeFromOpen(current);
 			addToClosed(current);
-
-			// search through all the neighbours of the current node evaluating
-
-			// them as next steps
-
+			// Verifica todos os vizinhos do no atual
 			for (int x = -1; x < 2; x++) {
 				for (int y = -1; y < 2; y++) {
-					// not a neighbour, its the current tile
-
+					// Se for nó atual
 					if ((x == 0) && (y == 0)) {
 						continue;
 					}
-
-					// if we're not allowing diaganol movement then only
-
-					// one of x or y can be set
-
-					if (!allowDiagMovement) {
+					// Verifica se diagonal esta permitida
+					if (!movimentoDiagonal) {
 						if ((x != 0) && (y != 0)) {
 							continue;
 						}
 					}
-
-					// determine the location of the neighbour and evaluate it
-
+					// Determina a localização do vizinho e o avalia
 					int xp = x + current.x;
 					int yp = y + current.y;
 
 					if (isValidLocation(mover, sx, sy, xp, yp)) {
-						// the cost to get to this node is cost the current plus
-						// the movement
-
-						// cost to reach this node. Note that the heursitic
-						// value is only used
-
-						// in the sorted open list
-
-						float nextStepCost = current.cost
-								+ getMovementCost(mover, current.x, current.y,
-										xp, yp);
+						// Custo de movimento para este node
+						float nextStepCost = current.custo + getMovementCost(mover, current.x, current.y, xp, yp);
 						Node neighbour = nodes[xp][yp];
-						map.pathFinderVisited(xp, yp);
-
-						// if the new cost we've determined for this node is
-						// lower than
-
-						// it has been previously makes sure the node hasn'e've
-						// determined that there might have been a better path
-						// to get to
-
-						// this node so it needs to be re-evaluated
-
-						if (nextStepCost < neighbour.cost) {
+						mapa.pathFinderVisited(xp, yp);
+						// Caso o custo seja menor
+						if (nextStepCost < neighbour.custo) {
 							if (inOpenList(neighbour)) {
 								removeFromOpen(neighbour);
 							}
@@ -159,317 +100,151 @@ public class AStarPathFinder implements PathFinder {
 								removeFromClosed(neighbour);
 							}
 						}
-
-						// if the node hasn't already been processed and
-						// discarded then
-
-						// reset it's cost to our current cost and add it as a
-						// next possible
-
-						// step (i.e. to the open list)
-
-						if (!inOpenList(neighbour)
-								&& !(inClosedList(neighbour))) {
-							neighbour.cost = nextStepCost;
-							neighbour.heuristic = getHeuristicCost(mover, xp,
-									yp, tx, ty);
-							maxDepth = Math.max(maxDepth,
-									neighbour.setParent(current));
+						// Adiciona node na lista aberta caso não tenha sido descartado
+						if (!inOpenList(neighbour) && !(inClosedList(neighbour))) {
+							neighbour.custo = nextStepCost;
+							neighbour.heuristica = getHeuristicCost(mover, xp, yp, tx, ty);
+							profundidadeMaxima = Math.max(profundidadeMaxima, neighbour.setParente(current));
 							addToOpen(neighbour);
 						}
 					}
 				}
 			}
 		}
-
-		// since we'e've run out of search
-		// there was no path. Just return null
-
-		if (nodes[tx][ty].parent == null) {
+		// Caso o final não possua parente, retorna null ( não existe caminho)
+		if (nodes[tx][ty].parente == null) {
 			return null;
 		}
-
-		// At this point we've definitely found a path so we can uses the parent
-
-		// references of the nodes to find out way from the target location back
-
-		// to the start recording the nodes on the way.
-
-		Path path = new Path();
+		// Cria o caminho a partir dos nodes encontrados
+		Caminho path = new Caminho();
 		Node target = nodes[tx][ty];
 		while (target != nodes[sx][sy]) {
 			path.prependStep(target.x, target.y);
-			target = target.parent;
+			target = target.parente;
 		}
 		path.prependStep(sx, sy);
-
-		// thats it, we have our path
 
 		return path;
 	}
 
-	/**
-	 * Get the first element from the open list. This is the next one to be
-	 * searched.
-	 * 
-	 * @return The first element in the open list
-	 */
+	// Retorna o primeiro elemento da lista aberta
 	protected Node getFirstInOpen() {
-		return (Node) open.first();
+		return (Node) aberto.first();
 	}
-
-	/**
-	 * Add a node to the open list
-	 * 
-	 * @param node
-	 *            The node to be added to the open list
-	 */
+	// Adiciona um nó à lista aberta
 	protected void addToOpen(Node node) {
-		open.add(node);
+		aberto.add(node);
 	}
-
-	/**
-	 * Check if a node is in the open list
-	 * 
-	 * @param node
-	 *            The node to check for
-	 * @return True if the node given is in the open list
-	 */
+	// Verifica se tal nó esta na lista aberta
 	protected boolean inOpenList(Node node) {
-		return open.contains(node);
+		return aberto.contains(node);
 	}
-
-	/**
-	 * Remove a node from the open list
-	 * 
-	 * @param node
-	 *            The node to remove from the open list
-	 */
+	// Remove o nó da lista aberta
 	protected void removeFromOpen(Node node) {
-		open.remove(node);
+		aberto.remove(node);
 	}
-
-	/**
-	 * Add a node to the closed list
-	 * 
-	 * @param node
-	 *            The node to add to the closed list
-	 */
+	// Adiciona nó à lista fechada
 	protected void addToClosed(Node node) {
-		closed.add(node);
+		fechado.add(node);
 	}
-
-	/**
-	 * Check if the node supplied is in the closed list
-	 * 
-	 * @param node
-	 *            The node to search for
-	 * @return True if the node specified is in the closed list
-	 */
+	// Verifica se tal nó esta na lista fechada
 	protected boolean inClosedList(Node node) {
-		return closed.contains(node);
+		return fechado.contains(node);
 	}
-
-	/**
-	 * Remove a node from the closed list
-	 * 
-	 * @param node
-	 *            The node to remove from the closed list
-	 */
+	// Remove tal nó da lista fechada
 	protected void removeFromClosed(Node node) {
-		closed.remove(node);
+		fechado.remove(node);
 	}
-
-	/**
-	 * Check if a given location is valid for the supplied mover
-	 * 
-	 * @param mover
-	 *            The mover that would hold a given location
-	 * @param sx
-	 *            The starting x coordinate
-	 * @param sy
-	 *            The starting y coordinate
-	 * @param x
-	 *            The x coordinate of the location to check
-	 * @param y
-	 *            The y coordinate of the location to check
-	 * @return True if the location is valid for the given mover
-	 */
+	// Verifica se a localição é valida, a partir do tipo do monstro
 	protected boolean isValidLocation(int mover, int sx, int sy, int x, int y) {
-		boolean invalid = (x < 0) || (y < 0) || (x >= map.getWidthInTiles())
-				|| (y >= map.getHeightInTiles());
+		boolean invalid = (x < 0) || (y < 0) || (x >= mapa.getWidthInTiles()) || (y >= mapa.getHeightInTiles());
 
 		if ((!invalid) && ((sx != x) || (sy != y))) {
-			invalid = map.blocked(mover, x, y);
+			invalid = mapa.blocked(mover, x, y);
 		}
 
 		return !invalid;
 	}
-
-	/**
-	 * Get the cost to move through a given location
-	 * 
-	 * @param mover
-	 *            The entity that is being moved
-	 * @param sx
-	 *            The x coordinate of the tile whose cost is being determined
-	 * @param sy
-	 *            The y coordiante of the tile whose cost is being determined
-	 * @param tx
-	 *            The x coordinate of the target location
-	 * @param ty
-	 *            The y coordinate of the target location
-	 * @return The cost of movement through the given tile
-	 */
+	// Retorna o custo para dada localização
 	public float getMovementCost(int mover, int sx, int sy, int tx, int ty) {
-		return map.getCost(mover, sx, sy, tx, ty);
+		return mapa.getCost(mover, sx, sy, tx, ty);
 	}
-
-	/**
-	 * Get the heuristic cost for the given location. This determines in which
-	 * order the locations are processed.
-	 * 
-	 * @param mover
-	 *            The entity that is being moved
-	 * @param x
-	 *            The x coordinate of the tile whose cost is being determined
-	 * @param y
-	 *            The y coordiante of the tile whose cost is being determined
-	 * @param tx
-	 *            The x coordinate of the target location
-	 * @param ty
-	 *            The y coordinate of the target location
-	 * @return The heuristic cost assigned to the tile
-	 */
+	// Retorna o custo da heuristica para detemrinada localização
 	public float getHeuristicCost(int mover, int x, int y, int tx, int ty) {
-		return heuristic.getCost(map, mover, x, y, tx, ty);
+		return heuristica.getCost(mapa, mover, x, y, tx, ty);
 	}
-
-	/**
-	 * A simple sorted list
-	 *
-	 * @author kevin
-	 */
+	// Lista Ordenada
 	private class SortedList {
-		/** The list of elements */
+		// Lista de elementos
 		private ArrayList list = new ArrayList();
-
-		/**
-		 * Retrieve the first element from the list
-		 * 
-		 * @return The first element from the list
-		 */
+		// Retorna o primeiro elemntos
 		public Object first() {
 			return list.get(0);
 		}
-
-		/**
-		 * Empty the list
-		 */
+		// Esvazia lista
 		public void clear() {
 			list.clear();
 		}
-
-		/**
-		 * Add an element to the list - causes sorting
-		 * 
-		 * @param o
-		 *            The element to add
-		 */
+		// Adiciona um elemento da lista, mantendo ordenada
 		public void add(Object o) {
 			try {
 				synchronized (list) {
 					list.add(o);
 					Collections.sort(list);
 				}
-			} catch(NullPointerException e) {
+			} catch (NullPointerException e) {
 				return;
 			}
 		}
-
-		/**
-		 * Remove an element from the list
-		 * 
-		 * @param o
-		 *            The element to remove
-		 */
+		// Remove um elemento da lista
 		public void remove(Object o) {
 			list.remove(o);
 		}
-
-		/**
-		 * Get the number of elements in the list
-		 * 
-		 * @return The number of element in the list
-		 */
+		// Retorna quantidade de lementos na lista
 		public int size() {
 			return list.size();
 		}
-
-		/**
-		 * Check if an element is in the list
-		 * 
-		 * @param o
-		 *            The element to search for
-		 * @return True if the element is in the list
-		 */
+		// Verifica se elemento exist ena lista
 		public boolean contains(Object o) {
 			return list.contains(o);
 		}
 	}
 
-	/**
-	 * A single node in the search graph
-	 */
+	// Classe Nó
 	private class Node implements Comparable {
-		/** The x coordinate of the node */
+		// Posição na matriz
 		private int x;
-		/** The y coordinate of the node */
 		private int y;
-		/** The path cost for this node */
-		private float cost;
-		/** The parent of this node, how we reached it in the search */
-		private Node parent;
-		/** The heuristic cost of this node */
-		private float heuristic;
-		/** The search depth of this node */
-		private int depth;
+		// Custo do caminho para este nó
+		private float custo;
+		// Parente deste nó (encontrado na busca)
+		private Node parente;
+		// Custo da heuristica deste nó
+		private float heuristica;
+		// Profundidade do nó
+		private int profundidade;
 
-		/**
-		 * Create a new node
-		 * 
-		 * @param x
-		 *            The x coordinate of the node
-		 * @param y
-		 *            The y coordinate of the node
-		 */
+		// Construtor
 		public Node(int x, int y) {
 			this.x = x;
 			this.y = y;
 		}
 
-		/**
-		 * Set the parent of this node
-		 * 
-		 * @param parent
-		 *            The parent node which lead us to this node
-		 * @return The depth we have no reached in searching
-		 */
-		public int setParent(Node parent) {
-			depth = parent.depth + 1;
-			this.parent = parent;
+		// Seta o parente do nó
+		public int setParente(Node parente) {
+			profundidade = parente.profundidade + 1;
+			this.parente = parente;
 
-			return depth;
+			return profundidade;
 		}
 
-		/**
-		 * @see Comparable#compareTo(Object)
-		 */
+		// Comparador
+		// Verifica se o custo do no atual é ou não maior que dado Nó
 		public int compareTo(Object other) {
 			Node o = (Node) other;
 
-			float f = heuristic + cost;
-			float of = o.heuristic + o.cost;
+			float f = heuristica + custo;
+			float of = o.heuristica + o.custo;
 
 			if (f < of) {
 				return -1;

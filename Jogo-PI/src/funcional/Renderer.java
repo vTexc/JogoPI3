@@ -17,43 +17,41 @@ import javax.swing.*;
 import GameStates.GameStateManager;
 
 @SuppressWarnings("serial")
-public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
+public class Renderer extends JPanel implements Runnable, Mouse {
 	// Dimensoes
 	public static int WIDTH = 950;
 	public static int HEIGHT = 650;
-
 	// Thread
 	private Thread thread;
 	private boolean running;
-	
 	// Controle de FPS pelo thread
 	private int FPS = 60;
 	private long targetTime = 1000 / FPS;
 	public static int FRAMES;
-
 	// Imagem (NAO MEXER)
 	private BufferedImage image;
 	private Graphics2D g;
-
 	// Gerenciador do estado do jogo
 	private GameStateManager gsm;
-	
+	// Variação do tempo entre frames
 	public static double deltaTime;
+
 	// Construtor
 	public Renderer() {
 		super();
-		setPreferredSize(new Dimension(WIDTH, HEIGHT)); // Define o tamanho da tela
+		setPreferredSize(new Dimension(WIDTH, HEIGHT)); // Define o tamanho da
+														// tela
 		setFocusable(true);
 		requestFocus();
 		setLayout(null); // Define que a posiçao dos objeto nao eh predefinida
+		init();
 	}
 
-	//Inicializa Thread
+	// Inicializa Thread
 	public void addNotify() {
 		super.addNotify();
 		if (thread == null) {
 			thread = new Thread(this);
-			addKeyListener(this);
 			addMouseListener(this);
 			addMouseMotionListener(this);
 			thread.start();
@@ -68,12 +66,15 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 
 		gsm = new GameStateManager(); // Inizializa o gerenciador
 	}
+	/** JPanel Overrides **/
+	// Desenha na tela
+	public void paint(Graphics g) {
+		this.draw((Graphics2D) g);
+	}
 
 	/** Runnable Overides **/
-	// 
+	// Inicia a thread
 	public void run() {
-
-		init();
 		FRAMES = FPS;
 		double lastFrame = 0.0;
 		long start;
@@ -82,18 +83,19 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 
 		// Game Loop
 		while (running) {
+			update();
+			repaint();
 
 			start = System.nanoTime();
 
-			update();
-			draw();
-			drawToScreen();
+			// draw();
+			// drawToScreen();
 
 			elapsed = System.nanoTime() - start;
 
 			wait = targetTime - elapsed / 1000000;
 			deltaTime = wait;
-			lastFrame += deltaTime/1000;
+			lastFrame += deltaTime / 1000;
 			if (wait < 0)
 				wait = 5;
 
@@ -102,21 +104,21 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
-			if(lastFrame >= 1) {
+
+			if (lastFrame >= 1) {
 				FRAMES = (int) (1000 / wait);
 				lastFrame = 0.0;
 			}
 		}
 	}
-	
-	// Atualiza as informaçoes que irão para tela
+
+	// Atualiza as informações que irão para tela
 	private void update() {
 		gsm.update();
 	}
-	
+
 	// Desenha as informações na tela
-	private void draw() {
+	private void draw(Graphics2D g) {
 		gsm.draw(g);
 		g.setColor(Color.BLACK);
 		g.setFont(new Font("Arial", Font.PLAIN, 15));
@@ -124,41 +126,38 @@ public class Renderer extends JPanel implements Runnable, Mouse, KeyListener {
 	}
 
 	// Mostra a imagem gerada pelo draw()
-	private void drawToScreen() {
-		Graphics g2 = getGraphics();
-		g2.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-		g2.dispose();
-	}
-	
+	// private void drawToScreen() {
+	// Graphics g2 = getGraphics();
+	// g2.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+	// g2.dispose();
+	// }
+
 	/** Listeners **/
-	public void keyTyped(KeyEvent key) {
-	}
-
-	public void keyPressed(KeyEvent key) {
-		gsm.keyPressed(key.getKeyCode());
-	}
-
-	public void keyReleased(KeyEvent key) {
-		gsm.keyReleased(key.getKeyCode());
-	}
-	
-	public void mouseClicked(MouseEvent e) {
-		gsm.mouseClicked(e);
-	}
-	
-	public void mousePressed(MouseEvent e) {
-		gsm.mousePressed(e);
-	}
-	
-	public void mouseReleased(MouseEvent e) {
-		gsm.mouseReleased(e);
+	public void mouseDragged(MouseEvent e) {
+		gsm.mouseDragged(e);
 	}
 	
 	public void mouseMoved(MouseEvent e) {
 		gsm.mouseMoved(e);
 	}
-	
-	public void mouseDragged(MouseEvent e) {
-		gsm.mouseDragged(e);
+
+	public void mouseClicked(MouseEvent e) {
+		gsm.mouseClicked(e);
+	}
+
+	public void mousePressed(MouseEvent e) {
+		gsm.mousePressed(e);
+	}
+
+	public void mouseReleased(MouseEvent e) {
+		gsm.mouseReleased(e);
+	}
+
+	public void mouseEntered(MouseEvent e) {
+		gsm.mouseEntered(e);
+	}
+
+	public void mouseExited(MouseEvent e) {
+		gsm.mouseExited(e);
 	}
 }

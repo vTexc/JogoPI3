@@ -1,10 +1,10 @@
 package AEstrela;
 
-public class Step {
+public class Passo {
 	private int x;
 	private int y;
 
-	public Step(int x, int y) {
+	public Passo(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
@@ -22,8 +22,8 @@ public class Step {
 	}
 
 	public boolean equals(Object other) {
-		if (other instanceof Step) {
-			Step o = (Step) other;
+		if (other instanceof Passo) {
+			Passo o = (Passo) other;
 
 			return (o.x == x) && (o.y == y);
 		}

@@ -8,61 +8,59 @@ import funcional.Audio;
 import funcional.Renderer;
 
 public class MenuState extends GameState {
-	
+
 	private int currentChoice;
 
 	private Rectangle[] botao;
-	private String[] options = {"Start", "", "", "Quit", "Hardcore", "Normal"};
-	
+	private String[] options = { "Start", "", "", "Quit", "Hardcore", "Normal" };
+
 	private boolean start;
-	
+
 	private static final int NUMBOTAO = 4;
 	private Font titleFont;
-	
+
 	private Font font;
-	
+
 	private Audio bgMusic;
-	
+
 	public MenuState(GameStateManager gsm) {
-		
+
 		this.gsm = gsm;
 		this.start = false;
 		this.currentChoice = -1;
 		botao = new Rectangle[NUMBOTAO];
-		
-		for(int x = 0; x < botao.length; x++) {
-			botao[x] = new Rectangle(950/2 - 100, 650/2 + x*60, 200,50);
+
+		for (int x = 0; x < botao.length; x++) {
+			botao[x] = new Rectangle(950 / 2 - 100, 650 / 2 + x * 60, 200, 50);
 		}
-		
+
 		try {
-			titleFont = new Font(
-					"Century Gothic",
-					Font.PLAIN,
-					100);
-			
+			titleFont = new Font("Century Gothic", Font.PLAIN, 100);
+
 			font = new Font("Arial", Font.PLAIN, 40);
-			
-		}
-		catch(Exception e) {
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-//		bgMusic = new Audio("/Audio/MenuBG.mp3");
-//		bgMusic.play();
+
+		// bgMusic = new Audio("/Audio/MenuBG.mp3");
+		// bgMusic.play();
 	}
-	
-	public void init() {}
-	
-	public void update() {}
-	
+
+	public void init() {
+	}
+
+	public void update() {
+	}
+
 	public void draw(Graphics2D g) {
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, Renderer.WIDTH, Renderer.HEIGHT);
 		// draw title
 		g.setColor(Color.WHITE);
 		g.setFont(titleFont);
-		g.drawString("Troia", 950/2 - titleFont.getSize(), titleFont.getSize());
-		
+		g.drawString("Troia", 950 / 2 - titleFont.getSize(), titleFont.getSize());
+
 		// draw menu options
 		g.setFont(font);
 		if (!start) {
@@ -73,7 +71,7 @@ public class MenuState extends GameState {
 					g.setColor(Color.RED);
 				}
 				g.draw(botao[i]);
-				g.drawString(options[i],botao[i].x, botao[i].y + font.getSize());
+				g.drawString(options[i], botao[i].x, botao[i].y + font.getSize());
 			}
 		} else {
 			for (int i = 1; i < botao.length - 1; i++) {
@@ -86,62 +84,18 @@ public class MenuState extends GameState {
 				g.drawString(options[options.length - i], botao[i].x, botao[i].y + font.getSize());
 			}
 		}
-		
-	}
-	
-	public void keyPressed(int k) {
-	}
-	
-	public void keyReleased(int k) {}
 
-	public void mouseClicked(MouseEvent e) {
-		if(e.getButton() == MouseEvent.BUTTON1) {
-			switch(currentChoice) {
-				case 0:
-					if(!start)
-						start = true;
-					break;
-				case 1:
-					if(!start) {
-						
-					} else {
-						gsm.setState(GameStateManager.PLAY, false);
-					}
-					break;
-				case 2:
-					if(!start) {
-						
-					} else {
-						gsm.setState(GameStateManager.PLAY, true);
-					}
-					break;
-				case 3:
-					if(!start)
-						System.exit(0);
-					break;
-			}
-		}
-		if(e.getButton() == MouseEvent.BUTTON2) {
-			
-		}
-		if(e.getButton() == MouseEvent.BUTTON3) {
-			
-		}
 	}
 
-	public void mousePressed(MouseEvent e) {
+	/** Listeners Overrides */
+	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
-	}
 
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void mouseMoved(MouseEvent e) {
-		for(int i = 0; i < botao.length; i++) {
-			if(botao[i].contains(e.getPoint())) {
+		for (int i = 0; i < botao.length; i++) {
+			if (botao[i].contains(e.getPoint())) {
 				currentChoice = i;
 				return;
 			}
@@ -149,8 +103,58 @@ public class MenuState extends GameState {
 		currentChoice = -1;
 	}
 
-	public void mouseDragged(MouseEvent e) {
+	public void mouseClicked(MouseEvent e) {
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			switch (currentChoice) {
+			case 0:
+				if (!start)
+					start = true;
+				break;
+			case 1:
+				if (!start) {
+
+				} else {
+					gsm.setState(GameStateManager.PLAY, false);
+				}
+				break;
+			case 2:
+				if (!start) {
+
+				} else {
+					gsm.setState(GameStateManager.PLAY, true);
+				}
+				break;
+			case 3:
+				if (!start)
+					System.exit(0);
+				break;
+			}
+		}
+		if (e.getButton() == MouseEvent.BUTTON2) {
+
+		}
+		if (e.getButton() == MouseEvent.BUTTON3) {
+
+		}
+	}
+
+	public void mousePressed(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+
 	}
 }
