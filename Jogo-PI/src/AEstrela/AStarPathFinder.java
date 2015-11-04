@@ -7,17 +7,22 @@ import funcional.TileBasedMap;
 public class AStarPathFinder implements PathFinder {
 	// Conjunto de nós explorados
 	private ArrayList fechado = new ArrayList();
+
 	// Conjunto de nós parcilamente explorados
-	private SortedList aberto = new SortedList();
+	private ListaOrdenada aberto = new ListaOrdenada();
+
 	// Mapa base da procura
 	private TileBasedMap mapa;
+
 	// Maximo de tiles para buscar
 	private int distanciaMaxima;
 
 	// Nós no mapa
 	private Node[][] nodes;
+
 	// Permite diagonal ou não
 	private boolean movimentoDiagonal;
+
 	// Heuristica usada na A*
 	private AStarHeuristic heuristica;
 
@@ -25,7 +30,7 @@ public class AStarPathFinder implements PathFinder {
 	public AStarPathFinder(TileBasedMap mapa, int distanciaMaxima, boolean movimentoDiagonal) {
 		this(mapa, distanciaMaxima, movimentoDiagonal, new ClosestHeuristic());
 	}
-	
+
 	// Construtor
 	public AStarPathFinder(TileBasedMap mapa, int distanciaMaxima, boolean movimentoDiagonal, AStarHeuristic heuristica) {
 		this.heuristica = heuristica;
@@ -53,7 +58,7 @@ public class AStarPathFinder implements PathFinder {
 		nodes[sx][sy].custo = 0;
 		nodes[sx][sy].profundidade = 0;
 		fechado.clear();
-		aberto.clear();
+		aberto.limpa();
 		aberto.add(nodes[sx][sy]);
 
 		nodes[tx][ty].parente = null;
@@ -61,7 +66,7 @@ public class AStarPathFinder implements PathFinder {
 		// Enquanto não terminou a profundidade de busca
 		int profundidadeMaxima = 0;
 		while ((profundidadeMaxima < distanciaMaxima) && (aberto.size() != 0)) {
-			
+
 			Node current = getFirstInOpen();
 			if (current == nodes[tx][ty]) {
 				break;
@@ -100,7 +105,8 @@ public class AStarPathFinder implements PathFinder {
 								removeFromClosed(neighbour);
 							}
 						}
-						// Adiciona node na lista aberta caso não tenha sido descartado
+						// Adiciona node na lista aberta caso não tenha sido
+						// descartado
 						if (!inOpenList(neighbour) && !(inClosedList(neighbour))) {
 							neighbour.custo = nextStepCost;
 							neighbour.heuristica = getHeuristicCost(mover, xp, yp, tx, ty);
@@ -129,32 +135,39 @@ public class AStarPathFinder implements PathFinder {
 
 	// Retorna o primeiro elemento da lista aberta
 	protected Node getFirstInOpen() {
-		return (Node) aberto.first();
+		return (Node) aberto.inicio();
 	}
+
 	// Adiciona um nó à lista aberta
 	protected void addToOpen(Node node) {
 		aberto.add(node);
 	}
+
 	// Verifica se tal nó esta na lista aberta
 	protected boolean inOpenList(Node node) {
 		return aberto.contains(node);
 	}
+
 	// Remove o nó da lista aberta
 	protected void removeFromOpen(Node node) {
 		aberto.remove(node);
 	}
+
 	// Adiciona nó à lista fechada
 	protected void addToClosed(Node node) {
 		fechado.add(node);
 	}
+
 	// Verifica se tal nó esta na lista fechada
 	protected boolean inClosedList(Node node) {
 		return fechado.contains(node);
 	}
+
 	// Remove tal nó da lista fechada
 	protected void removeFromClosed(Node node) {
 		fechado.remove(node);
 	}
+
 	// Verifica se a localição é valida, a partir do tipo do monstro
 	protected boolean isValidLocation(int mover, int sx, int sy, int x, int y) {
 		boolean invalid = (x < 0) || (y < 0) || (x >= mapa.getWidthInTiles()) || (y >= mapa.getHeightInTiles());
@@ -165,48 +178,57 @@ public class AStarPathFinder implements PathFinder {
 
 		return !invalid;
 	}
+
 	// Retorna o custo para dada localização
 	public float getMovementCost(int mover, int sx, int sy, int tx, int ty) {
 		return mapa.getCost(mover, sx, sy, tx, ty);
 	}
+
 	// Retorna o custo da heuristica para detemrinada localização
 	public float getHeuristicCost(int mover, int x, int y, int tx, int ty) {
 		return heuristica.getCost(mapa, mover, x, y, tx, ty);
 	}
+
 	// Lista Ordenada
-	private class SortedList {
+	private class ListaOrdenada {
 		// Lista de elementos
-		private ArrayList list = new ArrayList();
+		private ArrayList lista = new ArrayList();
+
 		// Retorna o primeiro elemntos
-		public Object first() {
-			return list.get(0);
+		public Object inicio() {
+			return lista.get(0);
 		}
+
 		// Esvazia lista
-		public void clear() {
-			list.clear();
+		public void limpa() {
+			lista.clear();
 		}
+
 		// Adiciona um elemento da lista, mantendo ordenada
 		public void add(Object o) {
 			try {
-				synchronized (list) {
-					list.add(o);
-					Collections.sort(list);
+				synchronized (lista) {
+					lista.add(o);
+					Collections.sort(lista);
 				}
 			} catch (NullPointerException e) {
 				return;
 			}
 		}
+
 		// Remove um elemento da lista
 		public void remove(Object o) {
-			list.remove(o);
+			lista.remove(o);
 		}
+
 		// Retorna quantidade de lementos na lista
 		public int size() {
-			return list.size();
+			return lista.size();
 		}
+
 		// Verifica se elemento exist ena lista
 		public boolean contains(Object o) {
-			return list.contains(o);
+			return lista.contains(o);
 		}
 	}
 
@@ -215,12 +237,16 @@ public class AStarPathFinder implements PathFinder {
 		// Posição na matriz
 		private int x;
 		private int y;
+		
 		// Custo do caminho para este nó
 		private float custo;
+		
 		// Parente deste nó (encontrado na busca)
 		private Node parente;
+		
 		// Custo da heuristica deste nó
 		private float heuristica;
+		
 		// Profundidade do nó
 		private int profundidade;
 

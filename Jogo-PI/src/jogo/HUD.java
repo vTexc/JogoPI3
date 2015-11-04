@@ -10,19 +10,24 @@ import GameStates.GameStateManager;
 public class HUD {
 	// Instancia do hud (Singleton)
 	private static HUD instancia;
+	
 	// Informações de recurso, vida e wave
 	private int recursos;
 	private int wave;
 	private int vidas;
+	
 	// Strings de impressão na tela
 	private String sRecursos;
 	private String sWave;
 	private String sVidas;
+	
 	// Estados
 	private boolean griding;
 	private boolean gameOver;
+	
 	// Font de impressão
 	private Font font;
+	
 	// Gerenciador de estados do jogo
 	private GameStateManager gsm;
 

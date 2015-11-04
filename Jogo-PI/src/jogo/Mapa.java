@@ -22,8 +22,10 @@ public class Mapa implements TileBasedMap {
 	public static final int TORRE_T = 4;
 	public static final int TORRE_V = 5;
 	public static final int TORRE_S = 6;
+	
 	// Mapa
 	private int[][] mapa;
+	
 	// Tiles visitados
 	// Usado para A*
 	private boolean[][] visited;
@@ -50,8 +52,7 @@ public class Mapa implements TileBasedMap {
 	}
 
 	// Coloca torre em determinado local do mapa
-	public synchronized void placeTorre(int tipo, int x, int y, PathFinder finder, ArrayList<Torre> torres,
-			ArrayList<Monstro> monstros) {
+	public synchronized void placeTorre(int tipo, int x, int y, PathFinder finder, ArrayList<Torre> torres, ArrayList<Monstro> monstros) {
 		Torre torre = null;
 		// Pega a torre que esta sendo criada
 		if (tipo == TORRE_T)
@@ -75,7 +76,7 @@ public class Mapa implements TileBasedMap {
 					for (Monstro m : monstros) {
 						m.atualizarCaminho(finder);
 						// Verifica se a torre esta sobre um monstro
-						if (!m.hasCaminho() || torre.getBounds().contains(m.getBounds())) {
+						if (!m.hasCaminho() || torre.getBounds().intersects(m.getBounds())) {
 							setMapa(x / 50, y / 50, 0);
 							torres.remove(torres.size() - 1);
 							m.atualizarCaminho(finder);
@@ -92,16 +93,15 @@ public class Mapa implements TileBasedMap {
 	}
 
 	// Deleta torre da posição dada
-	public synchronized void deleteTorre(int x, int y, PathFinder finder, ArrayList<Torre> torres,
-			ArrayList<Monstro> monstros, Torre t) {
+	public synchronized void deleteTorre(int x, int y, PathFinder finder, ArrayList<Torre> torres, ArrayList<Monstro> monstros, Torre t) {
 		setMapa(x / 50, y / 50, 0);
+		HUD.getInstancia().addRecursos(torres.get(torres.indexOf(t)).getVendaCusto());
 		torres.remove(t);
 		// Atualiza caminho dos monstros
 		for (Monstro m : monstros) {
 			m.atualizarCaminho(finder);
 		}
 		// Recupera recurso
-		HUD.getInstancia().addRecursos(torres.get(torres.indexOf(t)).getVendaCusto());
 	}
 
 	// Desenha mapa na tela

@@ -12,26 +12,34 @@ import javax.swing.*;
 
 import funcional.Mouse;
 
-public abstract class Torre extends JComponent implements Mouse {
+public abstract class Torre extends JComponent {
 	// Vida da torre
 	private int vida, vidaMax;
+	
 	// Status da torre
 	// Raio de ataque
 	private int rangeBase; // Base
-	private int range; // 
+	private int range;
 	private int rangeAtual; // Atual
+	
 	// Level da torre
 	private int upgrade;
+	
 	// Custo de venda
 	private int vendaCusto;
+	
 	// Custo de compra
 	private int custo;
+	
 	// Custo de upgrade
 	private int upgradeCusto;
+	
 	// Tipo (Terrestre, Voador, Destruidor)
 	private int tipo;
+	
 	// Verifica se mouse esta sobre esta torre
 	private boolean mouseOver;
+	
 	// Imagem
 	private Rectangle imagem;
 	private Color color;

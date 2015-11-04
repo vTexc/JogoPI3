@@ -11,16 +11,20 @@ import funcional.Renderer;
 public class TorreVoador extends Torre {
 	// Alvo atual
 	private Monstro target;
+	
 	// Informações de suporte
 	private boolean suporte;
 	private double suporteValue;
+	
 	// Informações de dano da torre
 	private int danoBase;
 	private int dano;
 	private int danoAtual;
+	
 	// Tempo de ataque
 	private double atqTime = 1;
 	private double maxAtqTime;
+	
 	// Lista dos tiros desta torre
 	private ArrayList<Tiro> tiros;
 

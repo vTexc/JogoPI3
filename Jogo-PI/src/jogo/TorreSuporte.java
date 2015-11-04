@@ -9,6 +9,7 @@ import funcional.Renderer;
 public class TorreSuporte extends Torre {
 	// Valor de aumento para torres
 	private double suporteValue;
+	
 	// Valor de slow para monstros
 	private double slowValue;
 

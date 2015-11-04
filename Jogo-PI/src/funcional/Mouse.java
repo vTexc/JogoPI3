@@ -9,32 +9,11 @@ import java.awt.event.MouseMotionListener;
 
 public interface Mouse extends MouseListener, MouseMotionListener {
 
-	public default void mouseDragged(MouseEvent e) {
-//		System.out.println("Arastou");
-	}
-
-	public default void mouseMoved(MouseEvent e) {
-//		System.out.println(e.getX() + " " + e.getY());
-	}
-
-	public default void mouseClicked(MouseEvent e) {
-//		System.out.println("Clicou");
-	}
-
-	public default void mousePressed(MouseEvent e) {
-//		System.out.println("Pressionou");
-	}
-
-	public default void mouseReleased(MouseEvent e) {
-//		System.out.println("Soltou");
-	}
-
-	public default void mouseEntered(MouseEvent e) {
-//		System.out.println("Entrou");
-	}
-
-	public default void mouseExited(MouseEvent e) {
-//		System.out.println("Saiu");
-	}
-
+	public abstract void mouseDragged(MouseEvent e);
+	public abstract void mouseMoved(MouseEvent e);
+	public abstract void mouseClicked(MouseEvent e);
+	public abstract void mousePressed(MouseEvent e);
+	public abstract void mouseReleased(MouseEvent e);
+	public abstract void mouseEntered(MouseEvent e);
+	public abstract void mouseExited(MouseEvent e);
 }

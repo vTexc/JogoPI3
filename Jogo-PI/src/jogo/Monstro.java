@@ -17,27 +17,37 @@ public abstract class Monstro extends JComponent {
 	// HP do monstro
 	private int vida, vidaMax;
 	private Rectangle lifeBar;
+	
 	// Recurso ganho ao mata-lo
 	private int recurso;
+	
 	// Posiçao e espaços na mapa
 	private double posicaoX, posicaoY;
+	
 	// Velocidade de movimento
 	private double speed;
+	
 	// Tipo do monstro (Voador, Terrestre ou Destruidor)
 	private int tipo;
+	
 	// Imagem do monstro
 	private Rectangle imagem;
+	
 	// Caminho a ser percorrido
 	private Caminho caminho;
+	
 	// Index atual do caminho a ser percorrido
 	private int index;
+	
 	// Determina direcao em que monstro esta olhando
 	private int direcao;
+	
 	// Predefine direçoes
 	private static final int CIMA = 0;
 	private static final int BAIXO = 1;
 	private static final int ESQUERDA = 2;
 	private static final int DIREITA = 3;
+	
 	// Verifica status do monstro
 	private double slowValue;
 	private boolean slow;
@@ -139,7 +149,7 @@ public abstract class Monstro extends JComponent {
 
 		// Pega próximo passo caso a soma das distancias seja
 		// menor que velocidade do jogo
-		if ((Math.abs(distX) + Math.abs(distY)) < PlayState.gameSpeed) {
+		if ((Math.abs(distX) + Math.abs(distY)) < (PlayState.gameSpeed * Renderer.deltaTime / 10)) {
 			this.index++;
 		}
 
@@ -178,9 +188,11 @@ public abstract class Monstro extends JComponent {
 		g.setColor(Color.gray);
 		g.fillRect((int) posicaoX, (int) posicaoY, (int) imagem.getWidth(), (int) imagem.getHeight());
 		// Barra de vida
-		g.setColor(Color.RED);
-		g.fillRect((int) posicaoX - 5, (int) posicaoY - 7, 20, lifeBar.height);
-		g.setColor(Color.green);
-		g.fillRect((int) posicaoX - 5, (int) posicaoY - 7, 20 * vida / vidaMax, lifeBar.height);
+		if(!isDead()) {
+			g.setColor(Color.RED);
+			g.fillRect((int) posicaoX - 5, (int) posicaoY - 7, 20, lifeBar.height);
+			g.setColor(Color.green);
+			g.fillRect((int) posicaoX - 5, (int) posicaoY - 7, 20 * vida / vidaMax, lifeBar.height);
+		}
 	}
 }

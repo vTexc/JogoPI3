@@ -21,18 +21,19 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 	// Dimensoes
 	public static int WIDTH = 950;
 	public static int HEIGHT = 650;
+	
 	// Thread
 	private Thread thread;
 	private boolean running;
+	
 	// Controle de FPS pelo thread
 	private int FPS = 60;
 	private long targetTime = 1000 / FPS;
 	public static int FRAMES;
-	// Imagem (NAO MEXER)
-	private BufferedImage image;
-	private Graphics2D g;
+	
 	// Gerenciador do estado do jogo
 	private GameStateManager gsm;
+	
 	// Variação do tempo entre frames
 	public static double deltaTime;
 
@@ -60,15 +61,15 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 
 	// Cria o formato de imagem para impressao na tela
 	private void init() {
-		image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-		g = (Graphics2D) image.getGraphics();
 		running = true; // Define que o programa esta rodando
 
 		gsm = new GameStateManager(); // Inizializa o gerenciador
 	}
+	
 	/** JPanel Overrides **/
 	// Desenha na tela
-	public void paint(Graphics g) {
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
 		this.draw((Graphics2D) g);
 	}
 
@@ -88,14 +89,13 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 
 			start = System.nanoTime();
 
-			// draw();
-			// drawToScreen();
-
 			elapsed = System.nanoTime() - start;
 
 			wait = targetTime - elapsed / 1000000;
 			deltaTime = wait;
 			lastFrame += deltaTime / 1000;
+			
+			System.out.println(deltaTime);
 			if (wait < 0)
 				wait = 5;
 
@@ -125,14 +125,7 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 		g.drawString(String.valueOf(Renderer.FRAMES), 5, this.HEIGHT);
 	}
 
-	// Mostra a imagem gerada pelo draw()
-	// private void drawToScreen() {
-	// Graphics g2 = getGraphics();
-	// g2.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-	// g2.dispose();
-	// }
-
-	/** Listeners **/
+	/** Listeners Overrides **/
 	public void mouseDragged(MouseEvent e) {
 		gsm.mouseDragged(e);
 	}

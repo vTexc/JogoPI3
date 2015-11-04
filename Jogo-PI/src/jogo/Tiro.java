@@ -1,6 +1,7 @@
 package jogo;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.*;
 
@@ -11,18 +12,23 @@ public class Tiro extends JComponent {
 	// Posição atual do tiro
 	private int x;
 	private int y;
+	
 	// Posição final do tiro
 	private int xf;
 	private int yf;
+	
 	// Retangulo de colisão da posição final
 	private Rectangle posicaoFinal;
+	
 	// Monstro alvo
 	private Monstro target;
+	
 	// Dano do tiro
 	private int dano;
+	
 	// Imagem
 	private Rectangle imagem;
-
+	
 	// Construtor
 	public Tiro(int x, int y, int xf, int yf, int dano, Monstro target) {
 		this.x = x;
@@ -31,7 +37,7 @@ public class Tiro extends JComponent {
 		this.yf = yf;
 		this.target = target;
 		this.dano = dano;
-		this.posicaoFinal = new Rectangle(xf - 20, yf - 20, 50, 50);
+		this.posicaoFinal = new Rectangle(xf - 5, yf - 5, 10, 10);
 
 		this.imagem = new Rectangle(x, y, 10, 10);
 		setBounds(this.imagem);
@@ -49,7 +55,7 @@ public class Tiro extends JComponent {
 
 	// Verifica se o tiro chegou no final
 	public boolean posicoaFinal() {
-		return (posicaoFinal.getBounds().contains(this.getBounds()));
+		return (posicaoFinal.intersects(this.getBounds()));
 	}
 
 	// Atualiza posição do tiro
@@ -60,15 +66,21 @@ public class Tiro extends JComponent {
 		// Angulo entre os pontos
 		double angulo = Math.atan2(dy, dx);
 		// Altera posiçãoatual em relação ao angulo
-		this.x += (500 * (Math.cos(angulo) * Renderer.deltaTime / 1000)) * PlayState.gameSpeed;
-		this.y += (500 * (Math.sin(angulo) * Renderer.deltaTime / 1000)) * PlayState.gameSpeed;
+		this.x += (300 * (Math.cos(angulo) * Renderer.deltaTime / 1000)) * PlayState.gameSpeed;
+		this.y += (300 * (Math.sin(angulo) * Renderer.deltaTime / 1000)) * PlayState.gameSpeed;
 		// Seta nova caisa de colisão
+		
+		imagem.setLocation(x, y);
 		setBounds(x, y, imagem.width, imagem.height);
+		posicaoFinal.setBounds(xf -  (int) Renderer.deltaTime, yf -  (int) Renderer.deltaTime , (int) Renderer.deltaTime  + 2 * PlayState.gameSpeed, (int) Renderer.deltaTime  + 2 * PlayState.gameSpeed);
 	}
 
 	// Dsenha tiro
 	public void draw(Graphics2D g) {
 		g.setColor(Color.BLACK);
-		g.fillRect(getX(), getY(), getWidth(), getHeight());
+		g.draw(imagem);
+		g.fill(imagem);
+		g.setColor(Color.red);
+		g.draw(posicaoFinal);
 	}
 }
