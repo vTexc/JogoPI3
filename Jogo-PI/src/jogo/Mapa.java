@@ -11,10 +11,13 @@ import AEstrela.PathFinder;
 
 public class Mapa implements TileBasedMap {
 	// Total de grids
-	private static final int WIDTH = 19;
-	private static final int HEIGHT = 13;
-
-	// Valores determinantes do espaço da matriz
+	public static final int WIDTH = 19;
+	public static final int HEIGHT = 13;
+	
+	// Mapa
+	private int[][] mapa;
+	
+	// Valores determinantes da imagem
 	public static final int TERRENO = 0;
 	public static final int MURO = 1;
 	public static final int OUTROS = 2;
@@ -22,9 +25,6 @@ public class Mapa implements TileBasedMap {
 	public static final int TORRE_T = 4;
 	public static final int TORRE_V = 5;
 	public static final int TORRE_S = 6;
-	
-	// Mapa
-	private int[][] mapa;
 	
 	// Tiles visitados
 	// Usado para A*
@@ -38,7 +38,7 @@ public class Mapa implements TileBasedMap {
 		for (int x = 0; x < HEIGHT; x++)
 			for (int y = 0; y < WIDTH; y++)
 				if ((x == 0 || y == 0 || x == 12 || y == 18) && x != 6)
-					mapa[x][y] = MURO;
+					mapa[x][y] = Mapa.MURO;
 	}
 
 	// Altera determinada posição do mapa
@@ -48,18 +48,18 @@ public class Mapa implements TileBasedMap {
 
 	// Verifica se pode por torre ou não
 	private boolean placeTorre(int x, int y) {
-		return (mapa[y][x] == TERRENO);
+		return (mapa[y][x] == Mapa.TERRENO);
 	}
 
 	// Coloca torre em determinado local do mapa
 	public synchronized void placeTorre(int tipo, int x, int y, PathFinder finder, ArrayList<Torre> torres, ArrayList<Monstro> monstros) {
 		Torre torre = null;
 		// Pega a torre que esta sendo criada
-		if (tipo == TORRE_T)
+		if (tipo == Mapa.TORRE_T)
 			torre = new TorreTerrestre(x, y, 1, 1);
-		else if (tipo == TORRE_V)
+		else if (tipo == Mapa.TORRE_V)
 			torre = new TorreVoador(x, y, 1, 1);
-		else if (tipo == TORRE_S)
+		else if (tipo == Mapa.TORRE_S)
 			torre = new TorreSuporte(x, y);
 
 		// Verifica se pode por torre na posição atual
@@ -108,7 +108,7 @@ public class Mapa implements TileBasedMap {
 	public void draw(Graphics2D g) {
 		for (int x = 0; x < HEIGHT; x++)
 			for (int y = 0; y < WIDTH; y++)
-				if (mapa[x][y] == MURO) {
+				if (mapa[x][y] == Mapa.MURO) {
 					g.setColor(Color.gray);
 					g.fillRect(y * 50, x * 50, 50, 50);
 				}
@@ -137,12 +137,12 @@ public class Mapa implements TileBasedMap {
 	// Retorna se o caminho esta bloqueado ou não
 	// para dado tipo
 	public boolean blocked(int mover, int x, int y) {
-		if (mover == VOADOR) {
-			return mapa[y][x] == MURO;
+		if (mover == Mapa.VOADOR) {
+			return mapa[y][x] == Mapa.MURO;
 		}
 
-		if (mover == OUTROS) {
-			return mapa[y][x] != TERRENO;
+		if (mover == Mapa.OUTROS) {
+			return mapa[y][x] != Mapa.TERRENO;
 		}
 
 		return true;

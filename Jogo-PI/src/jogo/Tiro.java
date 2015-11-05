@@ -17,8 +17,12 @@ public class Tiro extends JComponent {
 	private int xf;
 	private int yf;
 	
-	// Retangulo de colisão da posição final
-	private Rectangle posicaoFinal;
+	// Distancia Inicial
+	private int dist;
+	private double distF;
+	
+	// Tempo em tela
+	private double time;
 	
 	// Monstro alvo
 	private Monstro target;
@@ -30,15 +34,16 @@ public class Tiro extends JComponent {
 	private Rectangle imagem;
 	
 	// Construtor
-	public Tiro(int x, int y, int xf, int yf, int dano, Monstro target) {
+	public Tiro(int x, int y, int xf, int yf, int dist, int dano, Monstro target) {
 		this.x = x;
 		this.y = y;
 		this.xf = xf;
 		this.yf = yf;
 		this.target = target;
 		this.dano = dano;
-		this.posicaoFinal = new Rectangle(xf - 5, yf - 5, 10, 10);
-
+		this.time = 0;
+		this.dist = dist;
+		this.distF = Math.sqrt(((xf - x) * (xf - x)) + ((yf - y) * (yf - y)));
 		this.imagem = new Rectangle(x, y, 10, 10);
 		setBounds(this.imagem);
 	}
@@ -55,7 +60,12 @@ public class Tiro extends JComponent {
 
 	// Verifica se o tiro chegou no final
 	public boolean posicoaFinal() {
-		return (posicaoFinal.intersects(this.getBounds()));
+		time += Renderer.deltaTime * PlayState.gameSpeed;
+		if(time > (distF / dist) / 5) {
+			time = 0;
+			return true;
+		}
+		return false;
 	}
 
 	// Atualiza posição do tiro
@@ -66,13 +76,12 @@ public class Tiro extends JComponent {
 		// Angulo entre os pontos
 		double angulo = Math.atan2(dy, dx);
 		// Altera posiçãoatual em relação ao angulo
-		this.x += (300 * (Math.cos(angulo) * Renderer.deltaTime / 1000)) * PlayState.gameSpeed;
-		this.y += (300 * (Math.sin(angulo) * Renderer.deltaTime / 1000)) * PlayState.gameSpeed;
+		this.x += ((dist*5) * (Math.cos(angulo) * Renderer.deltaTime)) * PlayState.gameSpeed;
+		this.y += ((dist*5) * (Math.sin(angulo) * Renderer.deltaTime)) * PlayState.gameSpeed;
 		// Seta nova caisa de colisão
 		
 		imagem.setLocation(x, y);
 		setBounds(x, y, imagem.width, imagem.height);
-		posicaoFinal.setBounds(xf -  (int) Renderer.deltaTime, yf -  (int) Renderer.deltaTime , (int) Renderer.deltaTime  + 2 * PlayState.gameSpeed, (int) Renderer.deltaTime  + 2 * PlayState.gameSpeed);
 	}
 
 	// Dsenha tiro
@@ -80,7 +89,5 @@ public class Tiro extends JComponent {
 		g.setColor(Color.BLACK);
 		g.draw(imagem);
 		g.fill(imagem);
-		g.setColor(Color.red);
-		g.draw(posicaoFinal);
 	}
 }

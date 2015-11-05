@@ -11,10 +11,13 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.plaf.basic.BasicTabbedPaneUI.MouseHandler;
 import javax.swing.text.StyledEditorKit.FontSizeAction;
 
@@ -58,7 +61,9 @@ public class PlayState extends GameState {
 
 	// Botões
 	private Rectangle pauseBotao;
-	private Rectangle speedBotao;
+	// private Rectangle speedBotao;
+	private Animation speedBotao;
+	private int speedAtual;
 
 	// Velocidade do jogo
 	public static int gameSpeed;
@@ -71,9 +76,26 @@ public class PlayState extends GameState {
 		this.gsm = gsm;
 		this.hardcore = hc;
 		this.gameSpeed = 1;
-		this.speedBotao = new Rectangle(0, Renderer.HEIGHT - 50, 50, 50);
+		speedBotao = new Animation();
+		speedBotao.setFrames(loadImage("Sprites/Buttons/Speed.png", 3));
+		speedBotao.setDelay(-1);
+		speedBotao.setBounds(0, Renderer.HEIGHT - 50, 50, 50);
 		this.pauseBotao = new Rectangle(50, Renderer.HEIGHT - 50, 50, 50);
 		init();
+	}
+
+	// Carrega determinada imagem
+	private void loadImage(String image, int frames) {
+		try {
+			BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream(image));
+			sprites = new BufferedImage[frames];
+			
+			for (int i = 0; i < sprites.length; i++) {
+				sprites[i] = spritesheet.getSubimage(i * 50, 0, 50, 50);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	// Inicializador
@@ -97,11 +119,22 @@ public class PlayState extends GameState {
 		// Inicia lista de compra
 		int MAX_TORRES = 3; // Maximo de torres
 		listaTorres = new ArrayList<Torre>();
-		listaTorres.add(new TorreTerrestre(Renderer.WIDTH / 2 - (100 * MAX_TORRES) + (listaTorres.size() + 1) * (MAX_TORRES * 50), Renderer.HEIGHT - 50));
-		listaTorres.add(new TorreVoador(Renderer.WIDTH / 2 - (100 * MAX_TORRES) + (listaTorres.size() + 1) * (MAX_TORRES * 50), Renderer.HEIGHT - 50));
-		listaTorres.add(new TorreSuporte(Renderer.WIDTH / 2 - (100 * MAX_TORRES) + (listaTorres.size() + 1) * (MAX_TORRES * 50), Renderer.HEIGHT - 50));
+		listaTorres.add(new TorreTerrestre(
+				Renderer.WIDTH / 2 - (100 * MAX_TORRES) + (listaTorres.size() + 1) * (MAX_TORRES * 50),
+				Renderer.HEIGHT - 50));
+		listaTorres.add(
+				new TorreVoador(Renderer.WIDTH / 2 - (100 * MAX_TORRES) + (listaTorres.size() + 1) * (MAX_TORRES * 50),
+						Renderer.HEIGHT - 50));
+		listaTorres.add(
+				new TorreSuporte(Renderer.WIDTH / 2 - (100 * MAX_TORRES) + (listaTorres.size() + 1) * (MAX_TORRES * 50),
+						Renderer.HEIGHT - 50));
 	}
 
+	// Atualiza imagens
+	public void animationUpdate() {
+		speedBotao.update();
+	}
+	
 	// Atualiza informações dos monstros
 	private void monstroUpdate() {
 		for (Monstro m : monstros) {
@@ -171,18 +204,17 @@ public class PlayState extends GameState {
 		}
 
 		switch (gameSpeed) {
-			case 1:
-				g.setColor(Color.GREEN);
-				break;
-			case 3:
-				g.setColor(Color.YELLOW);
-				break;
-			case 5:
-				g.setColor(Color.red);
-				break;
+		case 1:
+			g.setColor(Color.GREEN);
+			break;
+		case 3:
+			g.setColor(Color.YELLOW);
+			break;
+		case 5:
+			g.setColor(Color.red);
+			break;
 		}
-		g.draw(speedBotao.getBounds());
-		g.fill(speedBotao.getBounds());
+		g.drawImage(speedBotao.getImage(), 0, Renderer.HEIGHT - 50, null);
 
 		g.setColor(Color.BLACK);
 		g.fillRect(pauseBotao.x, pauseBotao.y, pauseBotao.width, pauseBotao.height);
@@ -190,7 +222,9 @@ public class PlayState extends GameState {
 		if (pausado) {
 			g.setColor(Color.black);
 			g.setFont(new Font("Arial", Font.PLAIN, 200));
-			g.drawString("Pausado", (int) (Renderer.WIDTH / 2 - g.getFontMetrics().getStringBounds("Pausado", g).getWidth() / 2), Renderer.HEIGHT / 3);
+			g.drawString("Pausado",
+					(int) (Renderer.WIDTH / 2 - g.getFontMetrics().getStringBounds("Pausado", g).getWidth() / 2),
+					Renderer.HEIGHT / 3);
 		}
 	}
 
@@ -237,10 +271,13 @@ public class PlayState extends GameState {
 			}
 		}
 
-		if (speedBotao.getBounds().contains(e.getPoint())) {
+		if (speedBotao.contains(e.getPoint())) {
 			gameSpeed += 2;
-			if (gameSpeed > 5)
+			speedBotao.setFrame(speedBotao.getFrame() + 1);
+			if (gameSpeed > 5) {
 				gameSpeed = 1;
+				speedBotao.setFrame(0);
+			}
 		}
 	}
 
@@ -256,15 +293,15 @@ public class PlayState extends GameState {
 
 					selecionado = t.getTipo();
 					switch (t.getTipo()) {
-						case 4:
-							aux = new TorreTerrestre();
-							break;
-						case 5:
-							aux = new TorreVoador();
-							break;
-						case 6:
-							aux = new TorreSuporte();
-							break;
+					case 4:
+						aux = new TorreTerrestre();
+						break;
+					case 5:
+						aux = new TorreVoador();
+						break;
+					case 6:
+						aux = new TorreSuporte();
+						break;
 					}
 				}
 			}

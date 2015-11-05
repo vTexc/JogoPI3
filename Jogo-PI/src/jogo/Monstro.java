@@ -5,6 +5,7 @@
 package jogo;
 
 import java.awt.*;
+import java.awt.image.*;
 import java.util.*;
 
 import javax.swing.JComponent;
@@ -17,37 +18,38 @@ public abstract class Monstro extends JComponent {
 	// HP do monstro
 	private int vida, vidaMax;
 	private Rectangle lifeBar;
-	
+
 	// Recurso ganho ao mata-lo
 	private int recurso;
-	
+
 	// Posiçao e espaços na mapa
 	private double posicaoX, posicaoY;
-	
+
 	// Velocidade de movimento
 	private double speed;
-	
+
 	// Tipo do monstro (Voador, Terrestre ou Destruidor)
 	private int tipo;
-	
+
 	// Imagem do monstro
-	private Rectangle imagem;
-	
+	protected Animation[] animation;
+	protected Rectangle colisao;
+
 	// Caminho a ser percorrido
 	private Caminho caminho;
-	
+
 	// Index atual do caminho a ser percorrido
 	private int index;
-	
+
 	// Determina direcao em que monstro esta olhando
 	private int direcao;
-	
+
 	// Predefine direçoes
 	private static final int CIMA = 0;
 	private static final int BAIXO = 1;
 	private static final int ESQUERDA = 2;
 	private static final int DIREITA = 3;
-	
+
 	// Verifica status do monstro
 	private double slowValue;
 	private boolean slow;
@@ -57,16 +59,16 @@ public abstract class Monstro extends JComponent {
 	// Construtor
 	public Monstro(int tipo, int vida, int recurso) {
 		this.tipo = tipo;
-		this.imagem = new Rectangle(new Dimension(10, 20));
-		this.posicaoX = (int) (-49) + (25 - imagem.getWidth() / 2);
-		this.posicaoY = (int) (650 / 13 * 6) + (25 - imagem.getHeight() / 2);
+		this.colisao = new Rectangle(new Dimension(10, 20));
+		this.posicaoX = (int) (-49) + (25 - colisao.getWidth() / 2);
+		this.posicaoY = (int) (650 / 13 * 6) + (25 - colisao.getHeight() / 2);
 		this.vidaMax = vida;
 		this.vida = vida;
 		this.recurso = recurso;
 		this.direcao = DIREITA;
 		this.speed = 1;
-		this.lifeBar = new Rectangle((int) posicaoX, (int) posicaoY - 10, 10, 5);
-		setBounds(imagem);
+		this.lifeBar = new Rectangle((int) posicaoX - colisao.width / 2, (int) posicaoY - 10, colisao.width * 2, 5);
+		setBounds(colisao);
 	}
 
 	// Subtrai x da vida do monstro
@@ -132,7 +134,7 @@ public abstract class Monstro extends JComponent {
 
 	// Verifica se o monstro chegou ao final do caminho
 	public boolean isScreenOut() {
-		if (this.posicaoX > 950) {
+		if (this.posicaoX > Renderer.WIDTH) {
 			foraDaTela = true;
 			HUD.getInstancia().subVidas();
 		}
@@ -142,33 +144,34 @@ public abstract class Monstro extends JComponent {
 	// Atualiza posicao atual do monstro
 	// Usa o caminho como referencia
 	private void andar() {
-		setBounds((int) posicaoX, (int) posicaoY, imagem.width, imagem.height);
+		setBounds((int) posicaoX, (int) posicaoY, colisao.width, colisao.height);
 		// Distancias da posicao atual até o próximo passo do caminho
-		double distX = (this.caminho.getX(index) * 50) + (25 - imagem.getWidth() / 2) - this.posicaoX;
-		double distY = (this.caminho.getY(index) * 50) + (25 - imagem.getHeight() / 2) - this.posicaoY;
+		double distX = (this.caminho.getX(index) * 50) + (25 - colisao.getWidth() / 2) - this.posicaoX;
+		double distY = (this.caminho.getY(index) * 50) + (25 - colisao.getHeight() / 2) - this.posicaoY;
 
 		// Pega próximo passo caso a soma das distancias seja
 		// menor que velocidade do jogo
-		if ((Math.abs(distX) + Math.abs(distY)) < (PlayState.gameSpeed * Renderer.deltaTime / 10)) {
+		if ((Math.abs(distX) + Math.abs(distY)) < PlayState.gameSpeed * 3) {
 			this.index++;
 		}
 
 		// Atualiza a posição atual do monstro
 		double angulo = Math.atan2(distY, distX);
-		this.posicaoX += (50 * (Math.cos(angulo) * Renderer.deltaTime / 1000) * this.speed) * PlayState.gameSpeed;
-		this.posicaoY += (50 * (Math.sin(angulo) * Renderer.deltaTime / 1000) * this.speed) * PlayState.gameSpeed;
+		this.posicaoX += (50 * (Math.cos(angulo) * Renderer.deltaTime) * this.speed) * PlayState.gameSpeed;
+		this.posicaoY += (50 * (Math.sin(angulo) * Renderer.deltaTime) * this.speed) * PlayState.gameSpeed;
 
 		// Define a direção que o monstro esta olhando
 		angulo = Math.toDegrees(Math.atan2(distY, distX));
 
-		if (angulo >= -45 && angulo <= 45)
+		if (angulo >= -45 && angulo <= 45) {
 			direcao = DIREITA;
-		else if (angulo > 45 && angulo <= 135)
+		} else if (angulo > 45 && angulo <= 135) {
 			direcao = BAIXO;
-		else if (angulo < -45 && angulo > -135)
+		} else if (angulo < -45 && angulo > -135) {
 			direcao = CIMA;
-		else
+		} else {
 			direcao = ESQUERDA;
+		}
 	}
 
 	// Atualiza informações do monstro
@@ -180,19 +183,27 @@ public abstract class Monstro extends JComponent {
 			this.speed = 1;
 		}
 		slow = false;
+
+		// Atualiza barra de vida
+		lifeBar.setLocation((int) posicaoX - (int) colisao.getWidth() / 2, (int) posicaoY - 7);
+
+		animation[direcao].update();
 	}
 
 	// Desenha o monstor na tela
 	public void draw(Graphics2D g) {
 		// Monstro
-		g.setColor(Color.gray);
-		g.fillRect((int) posicaoX, (int) posicaoY, (int) imagem.getWidth(), (int) imagem.getHeight());
+		System.out.println(direcao);
+		g.drawImage(animation[direcao].getImage(), (int) posicaoX, (int) posicaoY, null);
 		// Barra de vida
-		if(!isDead()) {
+		if (!isDead()) {
 			g.setColor(Color.RED);
-			g.fillRect((int) posicaoX - 5, (int) posicaoY - 7, 20, lifeBar.height);
+			g.draw(lifeBar);
+			g.fill(lifeBar);
 			g.setColor(Color.green);
-			g.fillRect((int) posicaoX - 5, (int) posicaoY - 7, 20 * vida / vidaMax, lifeBar.height);
+			g.fillRect(lifeBar.x, lifeBar.y, (colisao.width * 2 * vida / vidaMax), lifeBar.height);
+			g.setColor(Color.black);
+			g.draw(lifeBar);
 		}
 	}
 }

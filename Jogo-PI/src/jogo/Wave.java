@@ -37,7 +37,7 @@ public class Wave {
 		if (gerar) {
 			if (qtdMonstros < maxMonstros) {
 				if (spawn < 1) {
-					spawn += Renderer.deltaTime/1000 * PlayState.gameSpeed;
+					spawn += Renderer.deltaTime * PlayState.gameSpeed;
 				} else {
 					qtdMonstros++;
 					monstros.add(new MonstroTerrestre());
@@ -50,7 +50,7 @@ public class Wave {
 		} else {
 			if(monstros.size() == 0) {
 				if(tempoAtual < tempoEspera) {
-					tempoAtual += Renderer.deltaTime/1000;
+					tempoAtual += Renderer.deltaTime;
 				} else {
 					gerar = true;
 					tempoAtual = 0;

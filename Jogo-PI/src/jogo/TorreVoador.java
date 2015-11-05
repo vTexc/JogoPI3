@@ -6,7 +6,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import GameStates.PlayState;
-import funcional.Renderer;
+import funcional.*;
 
 public class TorreVoador extends Torre {
 	// Alvo atual
@@ -30,7 +30,7 @@ public class TorreVoador extends Torre {
 
 	// Construtor após compra
 	public TorreVoador(int x, int y, double atqTime, int dano) {
-		super(5, x, y, 20, 100, Color.yellow);
+		super(Mapa.TORRE_V, x, y, 20, 100, Color.yellow);
 		this.danoBase = dano;
 		this.dano = dano;
 		this.danoAtual = dano;
@@ -56,7 +56,7 @@ public class TorreVoador extends Torre {
 				atqTime += 0.02 * PlayState.gameSpeed;
 			} else {
 				tiros.add(new Tiro(getX() + 25, getY() + 25, (int) target.getPosicaoX() + target.getWidth() / 2,
-						(int) target.getPosicaoY() + target.getHeight() / 2, danoAtual, target));
+						(int) target.getPosicaoY() + target.getHeight() / 2, this.getRangeAtual(), danoAtual, target));
 				atqTime = 0;
 			}
 		}

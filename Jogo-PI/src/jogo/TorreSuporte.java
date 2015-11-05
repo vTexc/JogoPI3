@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-import funcional.Renderer;
+import funcional.*;
 
 public class TorreSuporte extends Torre {
 	// Valor de aumento para torres
@@ -15,7 +15,7 @@ public class TorreSuporte extends Torre {
 
 	// Construtor após compra
 	public TorreSuporte(int x, int y) {
-		super(6, x, y, 50, 125, Color.magenta);
+		super(Mapa.TORRE_S, x, y, 50, 125, Color.magenta);
 		this.suporteValue = 0.3;
 		this.slowValue = 0.3;
 	}

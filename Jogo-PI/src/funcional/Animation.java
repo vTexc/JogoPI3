@@ -1,8 +1,11 @@
 package funcional;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class Animation {
+import javax.swing.JComponent;
+
+public class Animation extends JComponent {
 
 	private BufferedImage[] frames;
 	private int currentFrame;
@@ -17,16 +20,20 @@ public class Animation {
 	}
 
 	public void setFrames(BufferedImage[] frames) {
-		this.frames = frames;
+		this.frames = frames.clone();
 		currentFrame = 0;
 		startTime = System.nanoTime();
 		playedOnce = false;
 	}
-
+	
 	public void setDelay(long d) {
 		delay = d;
 	}
 
+	public long getDelay() {
+		return delay;
+	}
+	
 	public void setFrame(int i) {
 		currentFrame = i;
 	}

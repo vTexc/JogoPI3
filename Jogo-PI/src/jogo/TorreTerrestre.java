@@ -5,7 +5,7 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 
 import GameStates.PlayState;
-import funcional.Renderer;
+import funcional.*;
 
 public class TorreTerrestre extends Torre {
 	// Alvo atual
@@ -29,7 +29,7 @@ public class TorreTerrestre extends Torre {
 
 	// Construtor após compra
 	public TorreTerrestre(int x, int y, double atqTime, int dano) {
-		super(4, x, y, 15, 75, Color.green);
+		super(Mapa.TORRE_T, x, y, 15, 75, Color.green);
 		this.danoBase = dano;
 		this.dano = dano;
 		this.danoAtual = dano;
@@ -52,10 +52,10 @@ public class TorreTerrestre extends Torre {
 		if (target == null) {
 		} else {
 			if (atqTime < maxAtqTime) {
-				atqTime += 0.02 * PlayState.gameSpeed;
+				atqTime += Renderer.deltaTime * PlayState.gameSpeed;
 			} else {
 				tiros.add(new Tiro(getX() + 25, getY() + 25, (int) target.getPosicaoX() + target.getWidth() / 2,
-						(int) target.getPosicaoY() + target.getHeight() / 2, danoAtual, target));
+						(int) target.getPosicaoY() + target.getHeight() / 2, this.getRangeAtual(), danoAtual, target));
 				atqTime = 0;
 			}
 		}

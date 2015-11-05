@@ -92,10 +92,9 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 			elapsed = System.nanoTime() - start;
 
 			wait = targetTime - elapsed / 1000000;
-			deltaTime = wait;
-			lastFrame += deltaTime / 1000;
+			deltaTime = (double) wait / 1000;
+			lastFrame += deltaTime;
 			
-			System.out.println(deltaTime);
 			if (wait < 0)
 				wait = 5;
 
