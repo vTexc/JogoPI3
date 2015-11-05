@@ -9,7 +9,6 @@
 package funcional;
 
 import java.awt.*;
-import java.awt.image.*;
 import java.awt.event.*;
 
 import javax.swing.*;
@@ -121,7 +120,7 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 		gsm.draw(g);
 		g.setColor(Color.BLACK);
 		g.setFont(new Font("Arial", Font.PLAIN, 15));
-		g.drawString(String.valueOf(Renderer.FRAMES), 5, this.HEIGHT);
+		g.drawString(String.valueOf(Renderer.FRAMES), 5, Renderer.HEIGHT);
 	}
 
 	/** Listeners Overrides **/

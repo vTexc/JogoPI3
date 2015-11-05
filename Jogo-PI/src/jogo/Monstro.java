@@ -5,15 +5,13 @@
 package jogo;
 
 import java.awt.*;
-import java.awt.image.*;
-import java.util.*;
-
 import javax.swing.JComponent;
 
 import funcional.*;
 import AEstrela.*;
 import GameStates.*;
 
+@SuppressWarnings("serial")
 public abstract class Monstro extends JComponent {
 	// HP do monstro
 	private int vida, vidaMax;
@@ -32,7 +30,7 @@ public abstract class Monstro extends JComponent {
 	private int tipo;
 
 	// Imagem do monstro
-	protected Animation[] animation;
+	protected Imagem[] imagem;
 	protected Rectangle colisao;
 
 	// Caminho a ser percorrido
@@ -50,7 +48,7 @@ public abstract class Monstro extends JComponent {
 	private static final int ESQUERDA = 2;
 	private static final int DIREITA = 3;
 
-	// Verifica status do monstro
+	// Estados do monstro
 	private double slowValue;
 	private boolean slow;
 	private boolean morto;
@@ -126,8 +124,8 @@ public abstract class Monstro extends JComponent {
 
 	// Verifica estado atual do monstro (Vivo/Morto)
 	public boolean isDead() {
-		if (morto) {
-			HUD.getInstancia().addRecursos(this.recurso);
+		if(morto) {
+			HUD.getInstancia().addRecursos(recurso);
 		}
 		return morto;
 	}
@@ -141,8 +139,8 @@ public abstract class Monstro extends JComponent {
 		return foraDaTela;
 	}
 
-	// Atualiza posicao atual do monstro
-	// Usa o caminho como referencia
+	// Atualiza posição atual do monstro
+	// Usa o caminho da A*
 	private void andar() {
 		setBounds((int) posicaoX, (int) posicaoY, colisao.width, colisao.height);
 		// Distancias da posicao atual até o próximo passo do caminho
@@ -187,16 +185,15 @@ public abstract class Monstro extends JComponent {
 		// Atualiza barra de vida
 		lifeBar.setLocation((int) posicaoX - (int) colisao.getWidth() / 2, (int) posicaoY - 7);
 
-		animation[direcao].update();
+		imagem[direcao].update();
 	}
 
 	// Desenha o monstor na tela
 	public void draw(Graphics2D g) {
 		// Monstro
-		System.out.println(direcao);
-		g.drawImage(animation[direcao].getImage(), (int) posicaoX, (int) posicaoY, null);
+		g.drawImage(imagem[direcao].getImage(), (int) posicaoX, (int) posicaoY, null);
 		// Barra de vida
-		if (!isDead()) {
+		if (!morto) {
 			g.setColor(Color.RED);
 			g.draw(lifeBar);
 			g.fill(lifeBar);

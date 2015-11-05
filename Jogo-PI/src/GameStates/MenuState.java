@@ -1,11 +1,9 @@
 package GameStates;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
-import funcional.Audio;
-import funcional.Renderer;
+import funcional.*;
 
 public class MenuState extends GameState {
 
@@ -21,7 +19,7 @@ public class MenuState extends GameState {
 
 	private Font font;
 
-	private Audio bgMusic;
+//	private Audio bgMusic;
 
 	public MenuState(GameStateManager gsm) {
 
@@ -89,8 +87,6 @@ public class MenuState extends GameState {
 
 	/** Listeners Overrides */
 	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void mouseMoved(MouseEvent e) {
@@ -139,22 +135,14 @@ public class MenuState extends GameState {
 	}
 
 	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 }

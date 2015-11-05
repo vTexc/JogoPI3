@@ -2,7 +2,7 @@ package AEstrela;
 
 import funcional.TileBasedMap;
 
-public class ClosestHeuristic implements AStarHeuristic {
+public class Heuristica {
 	// Calcula heuristica
 	public float getCost(TileBasedMap mapa, int mover, int x, int y, int tx, int ty) {
 		float dx = tx - x;

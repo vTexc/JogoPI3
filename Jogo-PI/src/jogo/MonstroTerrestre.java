@@ -4,17 +4,17 @@ import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 
-import AEstrela.PathFinder;
-import funcional.Animation;
+import funcional.Imagem;
 
+@SuppressWarnings("serial")
 public class MonstroTerrestre extends Monstro {
-	// colisao
+	// Imagens para uso
 	private BufferedImage[][] sprites;
 
 	public MonstroTerrestre() {
 		super(Mapa.OUTROS, 3, 5);
 		
-		// Carrega colisao
+		// Carrega imagem
 		try {
 			BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream("/Sprites/Inimigos/Terrestre.png"));
 
@@ -30,11 +30,11 @@ public class MonstroTerrestre extends Monstro {
 			e.printStackTrace();
 		}
 
-		animation = new Animation[4];
-		for(int x = 0; x < animation.length; x++) {
-			animation[x] = new Animation();
-			animation[x].setFrames(sprites[x]);
-			animation[x].setDelay(100);
+		imagem = new Imagem[4];
+		for(int x = 0; x < imagem.length; x++) {
+			imagem[x] = new Imagem();
+			imagem[x].setFrames(sprites[x]);
+			imagem[x].setDelay(100);
 		}
 	}
 }

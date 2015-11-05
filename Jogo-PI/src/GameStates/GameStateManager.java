@@ -8,8 +8,7 @@
  */
 package GameStates;
 
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.awt.event.*;
 
 public class GameStateManager {
 	// Gerenciar os estados

@@ -1,38 +1,40 @@
 package jogo;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
+import java.awt.geom.*;
+import java.awt.image.*;
 
-import javax.swing.*;
+import javax.imageio.*;
 
-import GameStates.PlayState;
-import funcional.Renderer;
+import GameStates.*;
+import funcional.*;
 
-public class Tiro extends JComponent {
+public class Tiro {
 	// Posição atual do tiro
 	private int x;
 	private int y;
-	
+
 	// Posição final do tiro
 	private int xf;
 	private int yf;
-	
-	// Distancia Inicial
-	private int dist;
-	private double distF;
-	
+
+	// Distancias para calculo
+	private int dist; // Raio da torre
+	private double distF; // Distancia da torre até o monstro
+
 	// Tempo em tela
 	private double time;
-	
+
 	// Monstro alvo
 	private Monstro target;
-	
+
 	// Dano do tiro
 	private int dano;
-	
+
 	// Imagem
-	private Rectangle imagem;
-	
+	BufferedImage imagem;
+	AffineTransform at;
+
 	// Construtor
 	public Tiro(int x, int y, int xf, int yf, int dist, int dano, Monstro target) {
 		this.x = x;
@@ -44,8 +46,14 @@ public class Tiro extends JComponent {
 		this.time = 0;
 		this.dist = dist;
 		this.distF = Math.sqrt(((xf - x) * (xf - x)) + ((yf - y) * (yf - y)));
-		this.imagem = new Rectangle(x, y, 10, 10);
-		setBounds(this.imagem);
+
+		try {
+			BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream("/Sprites/Torres/Tiro.png"));
+			imagem = spritesheet.getSubimage(0, 0, 20, 20);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	// Retorna o alvo do tiro
@@ -59,9 +67,9 @@ public class Tiro extends JComponent {
 	}
 
 	// Verifica se o tiro chegou no final
-	public boolean posicoaFinal() {
+	public boolean posicaoFinal() {
 		time += Renderer.deltaTime * PlayState.gameSpeed;
-		if(time > (distF / dist) / 5) {
+		if (time > (distF / dist) / 5) {
 			time = 0;
 			return true;
 		}
@@ -76,18 +84,16 @@ public class Tiro extends JComponent {
 		// Angulo entre os pontos
 		double angulo = Math.atan2(dy, dx);
 		// Altera posiçãoatual em relação ao angulo
-		this.x += ((dist*5) * (Math.cos(angulo) * Renderer.deltaTime)) * PlayState.gameSpeed;
-		this.y += ((dist*5) * (Math.sin(angulo) * Renderer.deltaTime)) * PlayState.gameSpeed;
-		// Seta nova caisa de colisão
-		
-		imagem.setLocation(x, y);
-		setBounds(x, y, imagem.width, imagem.height);
+		this.x += ((dist * 5) * (Math.cos(angulo) * Renderer.deltaTime)) * PlayState.gameSpeed;
+		this.y += ((dist * 5) * (Math.sin(angulo) * Renderer.deltaTime)) * PlayState.gameSpeed;
+
+		// Atualiza transformador da imagem
+		at = AffineTransform.getTranslateInstance(x, y);
+		at.rotate(angulo, 5, 5);
 	}
 
 	// Dsenha tiro
 	public void draw(Graphics2D g) {
-		g.setColor(Color.BLACK);
-		g.draw(imagem);
-		g.fill(imagem);
+		g.drawImage(imagem, at, null);
 	}
 }

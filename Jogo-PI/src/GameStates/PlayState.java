@@ -6,20 +6,12 @@ package GameStates;
 
 import funcional.*;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.MouseInfo;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.*;
+import java.util.*;
 
-import javax.imageio.ImageIO;
-import javax.swing.plaf.basic.BasicTabbedPaneUI.MouseHandler;
-import javax.swing.text.StyledEditorKit.FontSizeAction;
+import javax.imageio.*;
 
 import AEstrela.*;
 import jogo.*;
@@ -39,14 +31,12 @@ public class PlayState extends GameState {
 	private ArrayList<Torre> torres;
 	private ArrayList<Monstro> monstros;
 
-	// Lista de compra das torres
-	private ArrayList<Torre> listaTorres;
-
 	// Informação de compra
 	private int selecionado;
 	private int selecionadoX;
 	private int selecionadoY;
 	private Torre aux;
+	private boolean placingTorre;
 
 	// Informaçao de wave, recursos, etc
 	private HUD hud;
@@ -60,42 +50,47 @@ public class PlayState extends GameState {
 	private PathFinder finder;
 
 	// Botões
-	private Rectangle pauseBotao;
-	// private Rectangle speedBotao;
-	private Animation speedBotao;
-	private int speedAtual;
+	private Imagem pauseBotao;
+	private Imagem speedBotao;
+	// Lista de compra das torres
+	private ArrayList<Imagem> listaTorres;
 
 	// Velocidade do jogo
 	public static int gameSpeed;
 
 	// Musica de fundo
-	private Audio bgMusic;
+//	private Audio bgMusic;
 
 	// Construtor
 	public PlayState(GameStateManager gsm, boolean hc) {
 		this.gsm = gsm;
 		this.hardcore = hc;
-		this.gameSpeed = 1;
-		speedBotao = new Animation();
-		speedBotao.setFrames(loadImage("Sprites/Buttons/Speed.png", 3));
-		speedBotao.setDelay(-1);
-		speedBotao.setBounds(0, Renderer.HEIGHT - 50, 50, 50);
-		this.pauseBotao = new Rectangle(50, Renderer.HEIGHT - 50, 50, 50);
+		PlayState.gameSpeed = 1;
+		this.speedBotao = new Imagem(0, Renderer.HEIGHT - 50, 50);
+		loadImage("/Sprites/Buttons/Speed.png", 3, speedBotao);
+		this.pauseBotao = new Imagem(50, Renderer.HEIGHT - 50, 50);
+		loadImage("/Sprites/Buttons/Pause.png", 2, pauseBotao);
 		init();
 	}
 
 	// Carrega determinada imagem
-	private void loadImage(String image, int frames) {
+	private void loadImage(String image, int frames, Imagem imagem) {
 		try {
 			BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream(image));
-			sprites = new BufferedImage[frames];
-			
+			BufferedImage[] sprites = new BufferedImage[frames];
+
 			for (int i = 0; i < sprites.length; i++) {
 				sprites[i] = spritesheet.getSubimage(i * 50, 0, 50, 50);
 			}
+
+			imagem.setFrames(sprites);
+			imagem.setDelay(-1);
+
+			return;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return;
 	}
 
 	// Inicializador
@@ -112,29 +107,24 @@ public class PlayState extends GameState {
 
 		// Define a base para a estrela
 		// AStarPathFinder(Mapa , Total de Tiles, Mover Diagonal)
-		finder = new AStarPathFinder(mapa, 13 * 19, false);
+		finder = new PathFinder(mapa, 13 * 19, false);
 
-		this.selecionado = 0;
+		this.selecionado = -1;
 
 		// Inicia lista de compra
 		int MAX_TORRES = 3; // Maximo de torres
-		listaTorres = new ArrayList<Torre>();
-		listaTorres.add(new TorreTerrestre(
-				Renderer.WIDTH / 2 - (100 * MAX_TORRES) + (listaTorres.size() + 1) * (MAX_TORRES * 50),
-				Renderer.HEIGHT - 50));
-		listaTorres.add(
-				new TorreVoador(Renderer.WIDTH / 2 - (100 * MAX_TORRES) + (listaTorres.size() + 1) * (MAX_TORRES * 50),
-						Renderer.HEIGHT - 50));
-		listaTorres.add(
-				new TorreSuporte(Renderer.WIDTH / 2 - (100 * MAX_TORRES) + (listaTorres.size() + 1) * (MAX_TORRES * 50),
-						Renderer.HEIGHT - 50));
+		String[] t1 = {
+				"/Sprites/Buttons/Compra_Torre-t.png",
+				"/Sprites/Buttons/Compra_Torre-v.png",
+				"/Sprites/Buttons/Compra_Torre-s.png",
+		};
+		listaTorres = new ArrayList<Imagem>();
+		for (int x = 0; x < MAX_TORRES; x++) {
+			listaTorres.add(new Imagem(Renderer.WIDTH / 2 - (100 * MAX_TORRES) + (x + 1) * (MAX_TORRES * 50), Renderer.HEIGHT - 50, 50));
+			loadImage(t1[x], 2, listaTorres.get(x));
+		}
 	}
 
-	// Atualiza imagens
-	public void animationUpdate() {
-		speedBotao.update();
-	}
-	
 	// Atualiza informações dos monstros
 	private void monstroUpdate() {
 		for (Monstro m : monstros) {
@@ -149,10 +139,15 @@ public class PlayState extends GameState {
 	private void torreUpdate() {
 		for (Torre t : torres) {
 			t.update(torres, monstros);
-			if (t.getBounds().contains(mouseX, mouseY)) {
-				t.setMouseOver(true);
-			} else {
-				t.setMouseOver(false);
+			if(!placingTorre) {
+				if (t.getBounds().contains(mouseX, mouseY)) {
+					if(!t.getMouseOver())
+						Collections.swap(torres, torres.indexOf(t), torres.size()-1);
+					
+					t.setMouseOver(true);
+				} else {
+					t.setMouseOver(false);
+				}
 			}
 		}
 	}
@@ -173,7 +168,7 @@ public class PlayState extends GameState {
 		g.setColor(new Color(255, 211, 155));
 		g.fillRect(0, 0, 950, 650);
 
-		if (selecionado != 0) {
+		if (selecionado >= 0) {
 			g.setColor(aux.getColor());
 			g.draw(aux.getImagem());
 			g.fill(aux.getImagem());
@@ -184,7 +179,7 @@ public class PlayState extends GameState {
 
 		// Desenha HuD
 		hud.draw(g);
-
+		
 		// Desenha torres
 		for (Torre t : torres) {
 			t.draw(g);
@@ -194,43 +189,52 @@ public class PlayState extends GameState {
 			m.draw(g);
 		}
 		// Desenha botões
-		for (Torre t : listaTorres) {
-			g.setColor(t.getColor());
-			g.draw(t.getImagem());
-			g.fill(t.getImagem());
-			g.setColor(Color.black);
-			g.setFont(new Font("Arial", Font.PLAIN, 30));
-			g.drawString(String.valueOf(t.getCusto()), t.getX() + 7, t.getY() + 37);
+		for (Imagem t : listaTorres) {
+			switch(listaTorres.indexOf(t)) {
+				case 0:
+					if(hud.getRecursos() - 15 >= 0) {
+						t.setFrame(0);
+					}else {
+						t.setFrame(1);
+					}
+					break;
+				case 1:
+					if(hud.getRecursos() - 20 >= 0) {
+						t.setFrame(0);
+					}else {
+						t.setFrame(1);
+					}
+					break;
+				case 2:
+					if(hud.getRecursos() - 50 >= 0) {
+						t.setFrame(0);
+					}else {
+						t.setFrame(1);
+					}
+					break;
+			}
+			g.drawImage(t.getImage(), t.getColisao().getBounds().x, t.getColisao().getBounds().y, null);
 		}
 
-		switch (gameSpeed) {
-		case 1:
-			g.setColor(Color.GREEN);
-			break;
-		case 3:
-			g.setColor(Color.YELLOW);
-			break;
-		case 5:
-			g.setColor(Color.red);
-			break;
-		}
-		g.drawImage(speedBotao.getImage(), 0, Renderer.HEIGHT - 50, null);
-
+		// Desenha botoes
+		// Velocidade
+		g.setColor(Color.black);
+		g.drawImage(speedBotao.getImage(), speedBotao.getColisao().getBounds().x, speedBotao.getColisao().getBounds().y, null);
+		// Pause
 		g.setColor(Color.BLACK);
-		g.fillRect(pauseBotao.x, pauseBotao.y, pauseBotao.width, pauseBotao.height);
+		g.drawImage(pauseBotao.getImage(), pauseBotao.getColisao().getBounds().x, pauseBotao.getColisao().getBounds().y, null);
 
+		// Caso jogo esteja pausado
 		if (pausado) {
 			g.setColor(Color.black);
 			g.setFont(new Font("Arial", Font.PLAIN, 200));
-			g.drawString("Pausado",
-					(int) (Renderer.WIDTH / 2 - g.getFontMetrics().getStringBounds("Pausado", g).getWidth() / 2),
-					Renderer.HEIGHT / 3);
+			g.drawString("Pausado", (int) (Renderer.WIDTH / 2 - g.getFontMetrics().getStringBounds("Pausado", g).getWidth() / 2), Renderer.HEIGHT / 3);
 		}
 	}
 
 	/** Listeners Overrides */
 	public void mouseDragged(MouseEvent e) {
-		if (selecionado != 0) {
+		if (placingTorre) {
 			selecionadoX = e.getX() / 50 * 50;
 			selecionadoY = e.getY() / 50 * 50;
 			aux.getImagem().x = selecionadoX;
@@ -252,7 +256,7 @@ public class PlayState extends GameState {
 			ArrayList<Torre> aux = (ArrayList<Torre>) torres.clone();
 
 			for (Torre t : aux) {
-				if (t.getBounds().contains(e.getPoint())) {
+				if (t.getMouseOver()) {
 					if (e.getButton() == MouseEvent.BUTTON2) {
 						t.upgrade();
 					}
@@ -262,11 +266,13 @@ public class PlayState extends GameState {
 				}
 			}
 
-			if (pauseBotao.getBounds().contains(e.getPoint())) {
+			if (pauseBotao.contains(e.getPoint())) {
+				pauseBotao.setFrame(1);
 				pausado = true;
 			}
 		} else {
-			if (pauseBotao.getBounds().contains(e.getPoint())) {
+			if (pauseBotao.contains(e.getPoint())) {
+				pauseBotao.setFrame(0);
 				pausado = false;
 			}
 		}
@@ -282,26 +288,24 @@ public class PlayState extends GameState {
 	}
 
 	public void mousePressed(MouseEvent e) {
-		int x = e.getX() / 50 * 50;
-		int y = e.getY() / 50 * 50;
-
 		if (!pausado) {
-			for (Torre t : listaTorres) {
-				if (t.getBounds().contains(e.getPoint())) {
+			for (Imagem t : listaTorres) {
+				if (t.contains(e.getPoint())) {
 					selecionadoX = e.getX();
 					selecionadoY = e.getY();
 
-					selecionado = t.getTipo();
-					switch (t.getTipo()) {
-					case 4:
-						aux = new TorreTerrestre();
-						break;
-					case 5:
-						aux = new TorreVoador();
-						break;
-					case 6:
-						aux = new TorreSuporte();
-						break;
+					selecionado = listaTorres.indexOf(t);
+					placingTorre = true;
+					switch (selecionado) {
+						case 0:
+							aux = new TorreTerrestre();
+							break;
+						case 1:
+							aux = new TorreVoador();
+							break;
+						case 2:
+							aux = new TorreSuporte();
+							break;
 					}
 				}
 			}
@@ -312,18 +316,19 @@ public class PlayState extends GameState {
 		int x = e.getX() / 50 * 50;
 		int y = e.getY() / 50 * 50;
 
-		if (selecionado != 0) {
-			mapa.placeTorre(selecionado, x, y, finder, torres, monstros);
-			selecionado = 0;
+		if (placingTorre) {
+			mapa.placeTorre(aux.getTipo(), x, y, finder, torres, monstros);
+			selecionado = -1;
 			aux = null;
+			placingTorre = false;
 		}
 	}
 
 	public void mouseEntered(MouseEvent e) {
-		this.pausado = false;
 	}
 
 	public void mouseExited(MouseEvent e) {
-		this.pausado = true;
+//		pauseBotao.setFrame(1);
+//		this.pausado = true;
 	}
 }

@@ -37,7 +37,7 @@ public class Caminho {
 	}
 
 	// Seta nova lista de passos
-	public void setSteps(ArrayList passos) {
+	public void setSteps(ArrayList<Passo> passos) {
 		this.passos = passos;
 	}
 

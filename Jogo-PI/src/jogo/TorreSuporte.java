@@ -1,11 +1,11 @@
 package jogo;
 
-import java.awt.Color;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.*;
 
 import funcional.*;
 
+@SuppressWarnings("serial")
 public class TorreSuporte extends Torre {
 	// Valor de aumento para torres
 	private double suporteValue;

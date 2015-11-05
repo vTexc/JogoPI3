@@ -1,12 +1,12 @@
 package jogo;
 
 import java.awt.*;
-import java.awt.event.MouseEvent;
 import java.util.*;
 
-import GameStates.PlayState;
+import GameStates.*;
 import funcional.*;
 
+@SuppressWarnings("serial")
 public class TorreTerrestre extends Torre {
 	// Alvo atual
 	private Monstro target;
@@ -65,7 +65,7 @@ public class TorreTerrestre extends Torre {
 	private void tirosUpdate() {
 		for (Tiro t : tiros) {
 			t.move();
-			if (t.posicoaFinal()) {
+			if (t.posicaoFinal()) {
 				t.getTarget().subVida(t.getDano());
 				tiros.remove(t);
 			}

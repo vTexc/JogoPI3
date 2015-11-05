@@ -1,10 +1,7 @@
 package jogo;
 
 import java.awt.*;
-import java.awt.image.*;
 import java.util.*;
-
-import javax.imageio.ImageIO;
 
 import funcional.TileBasedMap;
 import AEstrela.PathFinder;
@@ -92,7 +89,7 @@ public class Mapa implements TileBasedMap {
 		}
 	}
 
-	// Deleta torre da posição dada
+	// Deleta torre de determinada posição
 	public synchronized void deleteTorre(int x, int y, PathFinder finder, ArrayList<Torre> torres, ArrayList<Monstro> monstros, Torre t) {
 		setMapa(x / 50, y / 50, 0);
 		HUD.getInstancia().addRecursos(torres.get(torres.indexOf(t)).getVendaCusto());
@@ -163,7 +160,7 @@ public class Mapa implements TileBasedMap {
 		return WIDTH;
 	}
 
-	// Serifica se ja foi visitado
+	// Verifica se ja foi visitado
 	public void pathFinderVisited(int x, int y) {
 		visited[x][y] = true;
 	}

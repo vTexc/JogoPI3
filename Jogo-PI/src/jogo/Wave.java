@@ -36,7 +36,7 @@ public class Wave {
 	public void update(ArrayList<Monstro> monstros, PathFinder finder, HUD hud) {
 		if (gerar) {
 			if (qtdMonstros < maxMonstros) {
-				if (spawn < 1) {
+				if (spawn < maxSpawn) {
 					spawn += Renderer.deltaTime * PlayState.gameSpeed;
 				} else {
 					qtdMonstros++;

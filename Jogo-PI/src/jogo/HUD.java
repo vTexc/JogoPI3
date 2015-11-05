@@ -2,10 +2,7 @@ package jogo;
 
 import java.awt.*;
 
-import javax.swing.JLabel;
-
-import GameStates.GameState;
-import GameStates.GameStateManager;
+import GameStates.*;
 
 public class HUD {
 	// Instancia do hud (Singleton)
@@ -23,7 +20,7 @@ public class HUD {
 	
 	// Estados
 	private boolean griding;
-	private boolean gameOver;
+//	private boolean gameOver;
 	
 	// Font de impressão
 	private Font font;
@@ -38,7 +35,6 @@ public class HUD {
 		vidas = 20;
 		font = new Font("Arial", Font.PLAIN, 25);
 		griding = true;
-		this.gsm = gsm;
 	}
 
 	// Construtor do singleton com GameStateManager

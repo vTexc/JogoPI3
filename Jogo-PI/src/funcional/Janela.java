@@ -7,15 +7,11 @@
  **/
 package funcional;
 
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.*;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class Janela extends JFrame {
 	//Objeto usado para desenhar na janela
 	private Renderer renderer;

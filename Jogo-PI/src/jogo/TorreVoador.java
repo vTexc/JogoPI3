@@ -1,30 +1,29 @@
 package jogo;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.*;
 
-import GameStates.PlayState;
+import GameStates.*;
 import funcional.*;
 
+@SuppressWarnings("serial")
 public class TorreVoador extends Torre {
 	// Alvo atual
 	private Monstro target;
-	
+
 	// Informações de suporte
 	private boolean suporte;
 	private double suporteValue;
-	
+
 	// Informações de dano da torre
 	private int danoBase;
 	private int dano;
 	private int danoAtual;
-	
+
 	// Tempo de ataque
 	private double atqTime = 1;
 	private double maxAtqTime;
-	
+
 	// Lista dos tiros desta torre
 	private ArrayList<Tiro> tiros;
 
@@ -55,8 +54,8 @@ public class TorreVoador extends Torre {
 			if (atqTime < maxAtqTime) {
 				atqTime += 0.02 * PlayState.gameSpeed;
 			} else {
-				tiros.add(new Tiro(getX() + 25, getY() + 25, (int) target.getPosicaoX() + target.getWidth() / 2,
-						(int) target.getPosicaoY() + target.getHeight() / 2, this.getRangeAtual(), danoAtual, target));
+				tiros.add(new Tiro(getX() + 25, getY() + 25, (int) target.getPosicaoX() + target.getWidth() / 2, (int) target.getPosicaoY() + target.getHeight()
+						/ 2, this.getRangeAtual(), danoAtual, target));
 				atqTime = 0;
 			}
 		}
@@ -66,7 +65,7 @@ public class TorreVoador extends Torre {
 	private void tirosUpdate() {
 		for (Tiro t : tiros) {
 			t.move();
-			if (t.posicoaFinal()) {
+			if (t.posicaoFinal()) {
 				tiros.remove(t);
 				t.getTarget().subVida(t.getDano());
 			}
