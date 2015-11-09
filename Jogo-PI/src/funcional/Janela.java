@@ -1,5 +1,5 @@
 /**
- * Classe que cria a janela do jogo (Não o painel de desenho, apenas a janela)
+1 * Classe que cria a janela do jogo (Não o painel de desenho, apenas a janela)
  * 
  * Informaçoes uteis:
  *	Linha "this.setTitle("Troia");" > "Troia" é o nome superior que aparece na janela

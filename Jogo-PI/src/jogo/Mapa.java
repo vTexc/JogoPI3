@@ -15,6 +15,7 @@ public class Mapa implements TileBasedMap {
 	private int[][] mapa;
 	
 	// Valores determinantes da imagem
+	public static final int ENTRADA_SAIDA = -1;
 	public static final int TERRENO = 0;
 	public static final int MURO = 1;
 	public static final int OUTROS = 2;
@@ -34,8 +35,13 @@ public class Mapa implements TileBasedMap {
 
 		for (int x = 0; x < HEIGHT; x++)
 			for (int y = 0; y < WIDTH; y++)
-				if ((x == 0 || y == 0 || x == 12 || y == 18) && x != 6)
-					mapa[x][y] = Mapa.MURO;
+				if ((x == 0 || y == 0 || x == 12 || y == 18)) {
+					if(x == 6) {
+						mapa[x][y] = Mapa.ENTRADA_SAIDA;
+					} else {
+						mapa[x][y] = Mapa.MURO;
+					}
+				}
 	}
 
 	// Altera determinada posição do mapa
@@ -135,11 +141,11 @@ public class Mapa implements TileBasedMap {
 	// para dado tipo
 	public boolean blocked(int mover, int x, int y) {
 		if (mover == Mapa.VOADOR) {
-			return mapa[y][x] == Mapa.MURO;
+			return (mapa[y][x] == Mapa.MURO);
 		}
 
 		if (mover == Mapa.OUTROS) {
-			return mapa[y][x] != Mapa.TERRENO;
+			return (mapa[y][x] != Mapa.TERRENO && mapa[y][x] != Mapa.ENTRADA_SAIDA);
 		}
 
 		return true;
