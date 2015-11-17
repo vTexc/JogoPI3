@@ -2,6 +2,8 @@ package jogo;
 
 import java.util.*;
 
+import org.tritonus.share.sampled.mixer.TMixerProvider;
+
 import funcional.Renderer;
 import AEstrela.*;
 import GameStates.PlayState;
@@ -13,16 +15,16 @@ public class Wave {
 	private int qtdMonstros;
 	
 	private double tempoEspera;
-	private double tempoAtual;
+	private static double tempoAtual;
 	
-	private boolean gerar;
+	private static boolean gerar;
 	
 	public Wave() {
 		this.spawn = 1;
 		this.maxSpawn = 1;
 		this.maxMonstros = 5;
 		this.qtdMonstros = 0;
-		this.gerar = true;
+		this.gerar = false;
 		this.tempoEspera = 5;
 		this.tempoAtual = 0;
 	}
@@ -31,6 +33,14 @@ public class Wave {
 		this();
 		if(hardcore)
 			this.tempoEspera = 0;
+	}
+	
+	public static double getTempoAtual() {
+		return tempoAtual;
+	}
+	
+	public static boolean getGerar() {
+		return gerar;
 	}
 	
 	public void update(ArrayList<Monstro> monstros, PathFinder finder, HUD hud) {

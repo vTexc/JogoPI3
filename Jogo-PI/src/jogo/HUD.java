@@ -3,6 +3,7 @@ package jogo;
 import java.awt.*;
 
 import GameStates.*;
+import funcional.Renderer;
 
 public class HUD {
 	// Instancia do hud (Singleton)
@@ -12,11 +13,14 @@ public class HUD {
 	private int recursos;
 	private int wave;
 	private int vidas;
+	private double tempo;
 	
 	// Strings de impressão na tela
 	private String sRecursos;
 	private String sWave;
 	private String sVidas;
+	private String sTempo;
+	private String sTempoEspera;
 	
 	// Estados
 	private boolean griding;
@@ -33,7 +37,9 @@ public class HUD {
 		wave = 1;
 		recursos = 300000;
 		vidas = 20;
+		tempo = 0.0;
 		font = new Font("Arial", Font.PLAIN, 25);
+		
 		griding = true;
 	}
 
@@ -78,7 +84,7 @@ public class HUD {
 		wave = 1;
 		recursos = 30;
 		vidas = 20;
-		font = new Font("Arial", Font.PLAIN, 25);
+		tempo = 0.0;
 		griding = true;
 	}
 
@@ -114,9 +120,12 @@ public class HUD {
 
 	// Atualiza informações da hud
 	public void update() {
+		tempo += Renderer.deltaTime;
 		sRecursos = "Recursos : " + String.format("%06d", recursos);
 		sWave = "Wave : " + String.format("%03d", wave);
 		sVidas = "Vidas : " + String.format("%02d", vidas);
+		sTempo = String.format("%d", (int) tempo);
+		sTempoEspera = String.format("%.01f", Wave.getTempoAtual());
 		// Caso GameOver
 		if (vidas <= 0) {
 			reset();
@@ -140,5 +149,11 @@ public class HUD {
 		g.drawString(sRecursos, 5, font.getSize());
 		g.drawString(sWave, 950 / 2 - font.getSize() * 2, font.getSize());
 		g.drawString(sVidas, 950 - ((sVidas.length() / 2) * font.getSize()) - 5, font.getSize());
+		if(!Wave.getGerar()) {
+			g.setFont(new Font("Arial", Font.PLAIN, 15));
+			g.drawString(sTempoEspera, Renderer.WIDTH/2, 50);
+		}
+		g.setFont(font);
+		g.drawString(sTempo, Renderer.WIDTH/2, 50);
 	}
 }
