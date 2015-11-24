@@ -5,6 +5,9 @@
 package jogo;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
+
 import javax.swing.JComponent;
 
 import funcional.*;
@@ -12,26 +15,24 @@ import AEstrela.*;
 import GameStates.*;
 
 @SuppressWarnings("serial")
-public abstract class Monstro extends JComponent {
+public abstract class Monstro extends Componente implements Cloneable{
 	// HP do monstro
-	private int vida, vidaMax;
+	private double vida, vidaMax;
 	private Rectangle lifeBar;
 
 	// Recurso ganho ao mata-lo
 	private int recurso;
 
-	// Posiçao e espaços na mapa
-	private double posicaoX, posicaoY;
-
 	// Velocidade de movimento
 	private double speed;
+	private double speedBase;
 
 	// Tipo do monstro (Voador, Terrestre ou Destruidor)
 	private int tipo;
 
 	// Imagem do monstro
-	protected Imagem[] imagem;
-	protected Rectangle colisao;
+	protected Imagem imagem;
+	AffineTransform at;
 
 	// Caminho a ser percorrido
 	private Caminho caminho;
@@ -40,13 +41,7 @@ public abstract class Monstro extends JComponent {
 	private int index;
 
 	// Determina direcao em que monstro esta olhando
-	private int direcao;
-
-	// Predefine direçoes
-	private static final int CIMA = 0;
-	private static final int BAIXO = 1;
-	private static final int ESQUERDA = 2;
-	private static final int DIREITA = 3;
+	private double direcao;
 
 	// Estados do monstro
 	private double slowValue;
@@ -55,18 +50,19 @@ public abstract class Monstro extends JComponent {
 	private boolean foraDaTela;
 
 	// Construtor
-	public Monstro(int tipo, int vida, int recurso) {
+	public Monstro(int tipo, int vida, double speed, int w, int h, int recurso) {
+		super(w, h);
 		this.tipo = tipo;
-		this.colisao = new Rectangle(new Dimension(10, 20));
-		this.posicaoX = (int) (-49) + (25 - colisao.getWidth() / 2);
-		this.posicaoY = (int) (650 / 13 * 6) + (25 - colisao.getHeight() / 2);
+		this.setX(Mapa.getIntance().getEntradaY() * 50 - 25);
+		this.setY(Mapa.getIntance().getEntradaX() * 50  + (50 - this.getHeight()));
 		this.vidaMax = vida;
 		this.vida = vida;
 		this.recurso = recurso;
-		this.direcao = DIREITA;
-		this.speed = 1;
-		this.lifeBar = new Rectangle((int) posicaoX - colisao.width / 2, (int) posicaoY - 10, colisao.width * 2, 5);
-		setBounds(colisao);
+		this.direcao = 0;
+		this.speedBase = speed;
+		this.speed = speed;
+		this.lifeBar = new Rectangle(this.getX(), this.getY() - 10, this.getWidth(), 5);
+		setBounds(getX(), getY(), w, h);
 	}
 
 	// Subtrai x da vida do monstro
@@ -76,17 +72,29 @@ public abstract class Monstro extends JComponent {
 			morto = true;
 		}
 	}
-
-	// Retorna posicao x (Largura) atual do monstro
-	public double getPosicaoX() {
-		return posicaoX;
+	
+	// Adiciona x na vida do monstro
+	public void addVida(double vidaMax) {
+		this.vidaMax += vidaMax;
+		this.vida = this.vidaMax;
 	}
-
-	// Retorna posicao y (Altura) atual do monstro
-	public double getPosicaoY() {
-		return posicaoY;
+	
+	// Retorna VidaMax
+	public double getVidaMax() {
+		return vidaMax;
 	}
-
+	
+	// Adiciona speed
+	public void addSpeedBase(double speed) {
+		this.speedBase += speed;
+		this.speed = this.speedBase;
+	}
+	
+	// Retorna speed
+	public double getSpeedBase() {
+		return speedBase;
+	}
+	
 	// Retorna tipo do monstro
 	public int getTipo() {
 		return tipo;
@@ -114,11 +122,11 @@ public abstract class Monstro extends JComponent {
 
 	// Atualiza o caminho do monstro
 	public void atualizarCaminho(PathFinder finder) {
-		if (posicaoX / 50 < 18) {
+		if (getX() / 50 < Mapa.WIDTH && getX() / 50 >= 0 ) {
 			this.index = 1;
-			this.caminho = finder.findPath(tipo, (int) posicaoX / 50, (int) posicaoY / 50, 18, 6);
+			this.caminho = finder.findPath(tipo, getX() / 50, getY() / 50, Mapa.getIntance().getSaidaY(), Mapa.getIntance().getSaidaX());
 			if (caminho != null)
-				this.caminho.appendStep(19, 6);
+				this.caminho.appendStep(Mapa.getIntance().getSaidaY() + 1, Mapa.getIntance().getSaidaX());
 		}
 	}
 
@@ -132,7 +140,7 @@ public abstract class Monstro extends JComponent {
 
 	// Verifica se o monstro chegou ao final do caminho
 	public boolean isScreenOut() {
-		if (this.posicaoX > Renderer.WIDTH) {
+		if (this.getX() + this.getWidth() / 2 > Renderer.WIDTH) {
 			foraDaTela = true;
 			HUD.getInstancia().subVidas();
 		}
@@ -142,10 +150,9 @@ public abstract class Monstro extends JComponent {
 	// Atualiza posição atual do monstro
 	// Usa o caminho da A*
 	private void andar() {
-		setBounds((int) posicaoX, (int) posicaoY, colisao.width, colisao.height);
 		// Distancias da posicao atual até o próximo passo do caminho
-		double distX = (this.caminho.getX(index) * 50) + (25 - colisao.getWidth() / 2) - this.posicaoX;
-		double distY = (this.caminho.getY(index) * 50) + (25 - colisao.getHeight() / 2) - this.posicaoY;
+		double distX = (this.caminho.getX(index) * 50) + (25 - (double) this.getWidth() / 2) - this.getXDouble();
+		double distY = (this.caminho.getY(index) * 50) + (25 - (double) this.getHeight() / 2) - this.getYDouble();
 
 		// Pega próximo passo caso a soma das distancias seja
 		// menor que velocidade do jogo
@@ -154,53 +161,58 @@ public abstract class Monstro extends JComponent {
 		}
 
 		// Atualiza a posição atual do monstro
-		double angulo = Math.atan2(distY, distX);
-		this.posicaoX += (50 * (Math.cos(angulo) * Renderer.deltaTime) * this.speed) * PlayState.gameSpeed;
-		this.posicaoY += (50 * (Math.sin(angulo) * Renderer.deltaTime) * this.speed) * PlayState.gameSpeed;
+		direcao = Math.atan2(distY, distX);
+		this.addX((50  * this.speed * (Math.cos(direcao) * Renderer.deltaTime)) * PlayState.gameSpeed);
+		this.addY((50 * this.speed * (Math.sin(direcao) * Renderer.deltaTime)) * PlayState.gameSpeed);
 
-		// Define a direção que o monstro esta olhando
-		angulo = Math.toDegrees(Math.atan2(distY, distX));
-
-		if (angulo >= -45 && angulo <= 45) {
-			direcao = DIREITA;
-		} else if (angulo > 45 && angulo <= 135) {
-			direcao = BAIXO;
-		} else if (angulo < -45 && angulo > -135) {
-			direcao = CIMA;
-		} else {
-			direcao = ESQUERDA;
-		}
+		// Atualiza transformador da imagem
+		at = AffineTransform.getTranslateInstance(getXDouble(), getYDouble());
+		at.rotate(direcao, this.getWidth() / 2, this.getHeight() / 2);
 	}
 
 	// Atualiza informações do monstro
-	public void update(PathFinder finder) {
+	public void update() {
 		andar();
 		if (slow) {
-			this.speed = 1 - slowValue;
+			this.speed = speedBase * slowValue;
 		} else {
-			this.speed = 1;
+			this.speed = speedBase;
 		}
 		slow = false;
 
 		// Atualiza barra de vida
-		lifeBar.setLocation((int) posicaoX - (int) colisao.getWidth() / 2, (int) posicaoY - 7);
+		lifeBar.setLocation((int) getX(), (int) getY() - 7);
 
-		imagem[direcao].update();
+		imagem.update();
 	}
-
+	
+	// Update destruidor
+	public void update(ArrayList<Torre> torres, PathFinder finder) {}
+	
 	// Desenha o monstor na tela
 	public void draw(Graphics2D g) {
 		// Monstro
-		g.drawImage(imagem[direcao].getImage(), (int) posicaoX, (int) posicaoY, null);
+		g.drawImage(imagem.getImage(), at, null);
 		// Barra de vida
 		if (!morto) {
 			g.setColor(Color.RED);
 			g.draw(lifeBar);
 			g.fill(lifeBar);
 			g.setColor(Color.green);
-			g.fillRect(lifeBar.x, lifeBar.y, (colisao.width * 2 * vida / vidaMax), lifeBar.height);
+			g.fillRect(lifeBar.x, lifeBar.y, (int) (getWidth() * vida / vidaMax), lifeBar.height);
 			g.setColor(Color.black);
 			g.draw(lifeBar);
 		}
+	}
+	
+	/** Cloneable Overrides*/
+	public Object clone() {
+		try {
+			return super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

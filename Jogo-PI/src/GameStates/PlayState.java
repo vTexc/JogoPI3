@@ -49,9 +49,14 @@ public class PlayState extends GameState {
 	// Caminho a ser percorrido
 	private PathFinder finder;
 
+	/* Imagens */
 	// Botões
 	private Imagem pauseBotao;
 	private Imagem speedBotao;
+	private Imagem goBotao;
+	private Imagem homeBotao;
+	private Imagem pauseBg;
+	
 	// Lista de compra das torres
 	private ArrayList<Imagem> listaTorres;
 
@@ -67,20 +72,26 @@ public class PlayState extends GameState {
 		this.hardcore = hc;
 		PlayState.gameSpeed = 1;
 		this.speedBotao = new Imagem(0, Renderer.HEIGHT - 50, 50);
-		loadImage("/Sprites/Buttons/Speed.png", 3, speedBotao);
+		loadImage("/Sprites/Buttons/Speed.png", 3, speedBotao, 50, 50);
 		this.pauseBotao = new Imagem(50, Renderer.HEIGHT - 50, 50);
-		loadImage("/Sprites/Buttons/Pause.png", 2, pauseBotao);
+		loadImage("/Sprites/Buttons/Pause.png", 2, pauseBotao, 50, 50);
+		this.goBotao = new Imagem(0, Renderer.HEIGHT - 100, 50);
+		loadImage("/Sprites/Buttons/Go.png", 1, goBotao, 50, 50);
+		this.homeBotao = new Imagem(Renderer.WIDTH - 50, Renderer.HEIGHT - 50, 50);
+		loadImage("/Sprites/Buttons/Home.png", 1, homeBotao, 50, 50);
+		this.pauseBg = new Imagem(0, 0, Renderer.WIDTH, Renderer.HEIGHT);
+		loadImage("/Sprites/BgPause.png", 1, pauseBg, Renderer.WIDTH, Renderer.HEIGHT);
 		init();
 	}
-
-	// Carrega determinada imagem
-	private void loadImage(String image, int frames, Imagem imagem) {
+	
+	// Carrega determinada imagem com frames
+	private void loadImage(String path, int frames, Imagem imagem, int w, int h) {
 		try {
-			BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream(image));
+			BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream(path));
 			BufferedImage[] sprites = new BufferedImage[frames];
 
 			for (int i = 0; i < sprites.length; i++) {
-				sprites[i] = spritesheet.getSubimage(i * 50, 0, 50, 50);
+				sprites[i] = spritesheet.getSubimage(i * w, 0, w, h);
 			}
 
 			imagem.setFrames(sprites);
@@ -95,10 +106,10 @@ public class PlayState extends GameState {
 
 	// Inicializador
 	public void init() {
-		mapa = new Mapa(); // Cria mapa
+		mapa = Mapa.getIntance(); // Cria mapa
 		torres = new ArrayList<Torre>(); // Cria a lista para torres
 		monstros = new ArrayList<Monstro>(); // Cria lista para monstros
-
+		
 		wave = new Wave(hardcore);
 		hud = HUD.getInstancia(gsm); // Cria a hud
 
@@ -107,7 +118,7 @@ public class PlayState extends GameState {
 
 		// Define a base para a estrela
 		// AStarPathFinder(Mapa , Total de Tiles, Mover Diagonal)
-		finder = new PathFinder(mapa, 13 * 19, false);
+		finder = new PathFinder(mapa, mapa.HEIGHT * mapa.WIDTH, false);
 
 		this.selecionado = -1;
 
@@ -121,14 +132,23 @@ public class PlayState extends GameState {
 		listaTorres = new ArrayList<Imagem>();
 		for (int x = 0; x < MAX_TORRES; x++) {
 			listaTorres.add(new Imagem(Renderer.WIDTH / 2 - (100 * MAX_TORRES) + (x + 1) * (MAX_TORRES * 50), Renderer.HEIGHT - 50, 50));
-			loadImage(t1[x], 2, listaTorres.get(x));
+			loadImage(t1[x], 2, listaTorres.get(x), 50, 50);
 		}
 	}
 
+	// Reseta jogo
+	private void reset() {
+		hud.reset();
+	}
+	
 	// Atualiza informações dos monstros
 	private void monstroUpdate() {
 		for (Monstro m : monstros) {
-			m.update(finder);
+			if(m.getTipo() == Mapa.DESTRUIDOR) {
+				m.update(torres, finder);
+			} else {
+				m.update();
+			}
 			if (m.isScreenOut() || m.isDead()) {
 				monstros.remove(m);
 			}
@@ -149,33 +169,35 @@ public class PlayState extends GameState {
 					t.setMouseOver(false);
 				}
 			}
+			
+			if(t.isDead()) {
+				mapa.setMapa(t.getX() / 50, t.getY() / 50, 0);
+				torres.remove(t);
+			}
 		}
 	}
 
 	// Atualiza informaçoes
 	public void update() {
 		if (!pausado) {
-			wave.update(monstros, finder, hud);
+			wave.update(monstros, torres, finder, hud);
 			hud.update();
 			torreUpdate();
 			monstroUpdate();
 		}
 	}
-
+	
 	// Desenha na tela
 	public void draw(Graphics2D g) {
-		// Background (Temporario)
-		g.setColor(new Color(255, 211, 155));
-		g.fillRect(0, 0, 950, 650);
-
+		// Mapa
+		mapa.draw(g);
+		
 		if (selecionado >= 0) {
 			g.setColor(aux.getColor());
 			g.draw(aux.getImagem());
 			g.fill(aux.getImagem());
 		}
 
-		// Mapa
-		mapa.draw(g);
 
 		// Desenha HuD
 		hud.draw(g);
@@ -184,10 +206,12 @@ public class PlayState extends GameState {
 		for (Torre t : torres) {
 			t.draw(g);
 		}
+		
 		// Desenha Monstros
 		for (Monstro m : monstros) {
 			m.draw(g);
 		}
+		
 		// Desenha botões
 		for (Imagem t : listaTorres) {
 			switch(listaTorres.indexOf(t)) {
@@ -215,21 +239,27 @@ public class PlayState extends GameState {
 			}
 			g.drawImage(t.getImage(), t.getColisao().getBounds().x, t.getColisao().getBounds().y, null);
 		}
-
-		// Desenha botoes
-		// Velocidade
-		g.setColor(Color.black);
-		g.drawImage(speedBotao.getImage(), speedBotao.getColisao().getBounds().x, speedBotao.getColisao().getBounds().y, null);
-		// Pause
-		g.setColor(Color.BLACK);
-		g.drawImage(pauseBotao.getImage(), pauseBotao.getColisao().getBounds().x, pauseBotao.getColisao().getBounds().y, null);
-
+		
+		if(monstros.size() == 0 && !wave.getHardcore() && !wave.getSpawnar()) {
+			// GO
+			g.drawImage(goBotao.getImage(), goBotao.getColisao().getBounds().x, goBotao.getColisao().getBounds().y, null);
+		}
+		
 		// Caso jogo esteja pausado
 		if (pausado) {
+			g.drawImage(pauseBg.getImage(), 0, 0, null);
 			g.setColor(Color.black);
 			g.setFont(new Font("Arial", Font.PLAIN, 200));
 			g.drawString("Pausado", (int) (Renderer.WIDTH / 2 - g.getFontMetrics().getStringBounds("Pausado", g).getWidth() / 2), Renderer.HEIGHT / 3);
+			
+			g.drawImage(homeBotao.getImage(), homeBotao.getColisao().getBounds().x, homeBotao.getColisao().getBounds().y, null);
 		}
+
+		// Desenha botoes
+		// Velocidade
+		g.drawImage(speedBotao.getImage(), speedBotao.getColisao().getBounds().x, speedBotao.getColisao().getBounds().y, null);
+		// Pause
+		g.drawImage(pauseBotao.getImage(), pauseBotao.getColisao().getBounds().x, pauseBotao.getColisao().getBounds().y, null);
 	}
 
 	/** Listeners Overrides */
@@ -245,7 +275,6 @@ public class PlayState extends GameState {
 	public void mouseMoved(MouseEvent e) {
 		mouseX = e.getX();
 		mouseY = e.getY();
-
 	}
 
 	public void mouseClicked(MouseEvent e) {
@@ -266,6 +295,10 @@ public class PlayState extends GameState {
 				}
 			}
 
+			if(monstros.size() == 0 && !wave.getSpawnar() && goBotao.contains(e.getPoint())) {
+				wave.setTempoAtual(wave.getTempoEspera());
+			}
+			
 			if (pauseBotao.contains(e.getPoint())) {
 				pauseBotao.setFrame(1);
 				pausado = true;
@@ -274,6 +307,11 @@ public class PlayState extends GameState {
 			if (pauseBotao.contains(e.getPoint())) {
 				pauseBotao.setFrame(0);
 				pausado = false;
+			}
+			
+			if(homeBotao.contains(e.getPoint())) {
+				reset();
+				gsm.setState(GameStateManager.MENU);
 			}
 		}
 
@@ -328,7 +366,5 @@ public class PlayState extends GameState {
 	}
 
 	public void mouseExited(MouseEvent e) {
-//		pauseBotao.setFrame(1);
-//		this.pausado = true;
 	}
 }

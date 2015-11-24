@@ -32,8 +32,8 @@ public class Tiro {
 	private int dano;
 
 	// Imagem
-	BufferedImage imagem;
-	AffineTransform at;
+	private BufferedImage imagem;
+	private AffineTransform at;
 
 	// Construtor
 	public Tiro(int x, int y, int xf, int yf, int dist, int dano, Monstro target) {
@@ -49,7 +49,7 @@ public class Tiro {
 
 		try {
 			BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream("/Sprites/Torres/Tiro.png"));
-			imagem = spritesheet.getSubimage(0, 0, 20, 20);
+			imagem = spritesheet.getSubimage(0, 0, 9, 12);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -89,7 +89,7 @@ public class Tiro {
 
 		// Atualiza transformador da imagem
 		at = AffineTransform.getTranslateInstance(x, y);
-		at.rotate(angulo, 5, 5);
+		at.rotate(angulo, 4, 6);
 	}
 
 	// Dsenha tiro

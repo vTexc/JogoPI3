@@ -1,46 +1,51 @@
 package jogo;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
 
 import GameStates.*;
+import funcional.Imagem;
 import funcional.Renderer;
 
 public class HUD {
 	// Instancia do hud (Singleton)
 	private static HUD instancia;
-	
+
 	// Informações de recurso, vida e wave
 	private int recursos;
 	private int wave;
 	private int vidas;
-	private double tempo;
-	
+
+	// Imagens da hud
+	private BufferedImage[] sprites;
+
 	// Strings de impressão na tela
 	private String sRecursos;
 	private String sWave;
 	private String sVidas;
-	private String sTempo;
 	private String sTempoEspera;
-	
+
 	// Estados
 	private boolean griding;
-//	private boolean gameOver;
-	
+	// private boolean gameOver;
+
 	// Font de impressão
 	private Font font;
-	
+
 	// Gerenciador de estados do jogo
 	private GameStateManager gsm;
 
 	// Construtor do singleton normal
 	private HUD() {
-		wave = 1;
-		recursos = 300000;
+		wave = 0;
+		recursos = 30;
 		vidas = 20;
-		tempo = 0.0;
 		font = new Font("Arial", Font.PLAIN, 25);
-		
-		griding = true;
+
+		griding = false;
+		loadImage();
 	}
 
 	// Construtor do singleton com GameStateManager
@@ -65,6 +70,20 @@ public class HUD {
 		return instancia;
 	}
 
+	// Carregar imagem
+	private void loadImage() {
+		try {
+			BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream("/Sprites/HUD.png"));
+
+			sprites = new BufferedImage[2];
+			for (int i = 0; i < sprites.length; i++) {
+				sprites[i] = spritesheet.getSubimage(i * 50, 0, 50, 50);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	// Inicializa hud normal
 	private static synchronized void initInstancia() {
 		if (instancia == null) {
@@ -79,13 +98,18 @@ public class HUD {
 		}
 	}
 
+	// Retorna vidas
+	public int getVidas() {
+		return vidas;
+	}
+	
 	// Reseta informações do hud
-	private void reset() {
-		wave = 1;
+	public void reset() {
+		wave = 0;
 		recursos = 30;
 		vidas = 20;
-		tempo = 0.0;
-		griding = true;
+		griding = false;
+		Mapa.getIntance().reset();
 	}
 
 	// Retorna recursos
@@ -120,11 +144,9 @@ public class HUD {
 
 	// Atualiza informações da hud
 	public void update() {
-		tempo += Renderer.deltaTime;
-		sRecursos = "Recursos : " + String.format("%06d", recursos);
+		sRecursos = String.format("%06d", recursos);
 		sWave = "Wave : " + String.format("%03d", wave);
-		sVidas = "Vidas : " + String.format("%02d", vidas);
-		sTempo = String.format("%d", (int) tempo);
+		sVidas = String.format("%02d", vidas);
 		sTempoEspera = String.format("%.01f", Wave.getTempoAtual());
 		// Caso GameOver
 		if (vidas <= 0) {
@@ -146,14 +168,14 @@ public class HUD {
 		}
 		g.setFont(font);
 		g.setColor(Color.WHITE);
-		g.drawString(sRecursos, 5, font.getSize());
+		g.drawImage(sprites[0], 0, 0, 50, 50, null);
+		g.drawString(sRecursos, 50, 30);
 		g.drawString(sWave, 950 / 2 - font.getSize() * 2, font.getSize());
-		g.drawString(sVidas, 950 - ((sVidas.length() / 2) * font.getSize()) - 5, font.getSize());
-		if(!Wave.getGerar()) {
+		g.drawString(sVidas, Renderer.WIDTH - 87, 30);
+		g.drawImage(sprites[1], Renderer.WIDTH - 50, 0, 50, 50, null);
+		if (!Wave.getHardcore() && !Wave.getSpawnar()) {
 			g.setFont(new Font("Arial", Font.PLAIN, 15));
-			g.drawString(sTempoEspera, Renderer.WIDTH/2, 50);
+			g.drawString(sTempoEspera, Renderer.WIDTH / 2, 50);
 		}
-		g.setFont(font);
-		g.drawString(sTempo, Renderer.WIDTH/2, 50);
 	}
 }

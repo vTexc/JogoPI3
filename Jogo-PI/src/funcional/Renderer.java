@@ -26,9 +26,9 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 	private boolean running;
 	
 	// Controle de FPS pelo thread
-	private int FPS = 60;
+	private int FPS = 120;
 	private long targetTime = 1000 / FPS;
-	public static int FRAMES;
+	public int FRAMES;
 	
 	// Gerenciador do estado do jogo
 	private GameStateManager gsm;
@@ -61,6 +61,7 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 	// Cria o formato de imagem para impressao na tela
 	private void init() {
 		running = true; // Define que o programa esta rodando
+		FRAMES = FPS;
 
 		gsm = new GameStateManager(); // Inizializa o gerenciador
 	}
@@ -75,7 +76,6 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 	/** Runnable Overides **/
 	// Inicia a thread
 	public void run() {
-		FRAMES = FPS;
 		double lastFrame = 0.0;
 		long start;
 		long elapsed;
@@ -120,7 +120,7 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 		gsm.draw(g);
 		g.setColor(Color.BLACK);
 		g.setFont(new Font("Arial", Font.PLAIN, 15));
-		g.drawString(String.valueOf(Renderer.FRAMES), 5, Renderer.HEIGHT);
+		g.drawString(String.valueOf(FRAMES), 5, Renderer.HEIGHT);
 	}
 
 	/** Listeners Overrides **/

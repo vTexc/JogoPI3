@@ -17,12 +17,10 @@ public class GameStateManager {
 	private boolean hc;
 
 	// Numero maximo de estados
-	public static final int NUMSTATES = 4;
+	public static final int NUMSTATES = 2;
 	// Define todos os estados que o jogo pode ter
 	public static final int MENU = 0;
-	public static final int OPTIONS = 1;
-	public static final int CREDITS = 2;
-	public static final int PLAY = 3;
+	public static final int PLAY = 1;
 
 	// Inicializa o gerenciador, selecionando um estado como inicial
 	public GameStateManager() {
@@ -36,10 +34,6 @@ public class GameStateManager {
 	private void loadState(int state) {
 		if (state == MENU)
 			gameStates[state] = new MenuState(this);
-		if (state == OPTIONS)
-			gameStates[state] = new OptionState(this);
-		if (state == CREDITS)
-			gameStates[state] = new CreditState(this);
 		if (state == PLAY)
 			gameStates[state] = new PlayState(this, this.hc);
 	}

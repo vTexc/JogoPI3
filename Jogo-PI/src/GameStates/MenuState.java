@@ -10,11 +10,11 @@ public class MenuState extends GameState {
 	private int currentChoice;
 
 	private Rectangle[] botao;
-	private String[] options = { "Start", "", "", "Quit", "Hardcore", "Normal" };
+	private String[] options = { "Start", "Quit",  "Voltar", "Hardcore", "Normal"};
 
 	private boolean start;
 
-	private static final int NUMBOTAO = 4;
+	private static final int NUMBOTAO = 3;
 	private Font titleFont;
 
 	private Font font;
@@ -57,12 +57,15 @@ public class MenuState extends GameState {
 		// draw title
 		g.setColor(Color.WHITE);
 		g.setFont(titleFont);
-		g.drawString("Troia", 950 / 2 - titleFont.getSize(), titleFont.getSize());
+		int x = 950 /2 - titleFont.getSize();
+		int y = 0;
+		for(String line : ("ToWar\nDefense").split("\n"))
+			g.drawString(line, x, y += g.getFontMetrics().getHeight());
 
 		// draw menu options
 		g.setFont(font);
 		if (!start) {
-			for (int i = 0; i < botao.length; i++) {
+			for (int i = 0; i < botao.length - 1; i++) {
 				if (i == currentChoice) {
 					g.setColor(Color.WHITE);
 				} else {
@@ -72,14 +75,14 @@ public class MenuState extends GameState {
 				g.drawString(options[i], botao[i].x, botao[i].y + font.getSize());
 			}
 		} else {
-			for (int i = 1; i < botao.length - 1; i++) {
+			for (int i = 0; i < botao.length; i++) {
 				if (i == currentChoice) {
 					g.setColor(Color.WHITE);
 				} else {
 					g.setColor(Color.RED);
 				}
 				g.draw(botao[i]);
-				g.drawString(options[options.length - i], botao[i].x, botao[i].y + font.getSize());
+				g.drawString(options[options.length - i - 1], botao[i].x, botao[i].y + font.getSize());
 			}
 		}
 
@@ -103,34 +106,27 @@ public class MenuState extends GameState {
 		if (e.getButton() == MouseEvent.BUTTON1) {
 			switch (currentChoice) {
 			case 0:
-				if (!start)
+				if (!start) {
 					start = true;
+				} else {
+					gsm.setState(GameStateManager.PLAY, false);					
+				}
 				break;
 			case 1:
 				if (!start) {
-
+					System.exit(0);
 				} else {
-					gsm.setState(GameStateManager.PLAY, false);
+					gsm.setState(GameStateManager.PLAY, true);
 				}
 				break;
 			case 2:
 				if (!start) {
 
 				} else {
-					gsm.setState(GameStateManager.PLAY, true);
+					start = false;
 				}
 				break;
-			case 3:
-				if (!start)
-					System.exit(0);
-				break;
 			}
-		}
-		if (e.getButton() == MouseEvent.BUTTON2) {
-
-		}
-		if (e.getButton() == MouseEvent.BUTTON3) {
-
 		}
 	}
 

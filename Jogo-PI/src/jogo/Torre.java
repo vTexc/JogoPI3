@@ -5,10 +5,13 @@ import java.util.*;
 
 import javax.swing.*;
 
+import funcional.Componente;
+import funcional.Imagem;
+
 @SuppressWarnings("serial")
-public abstract class Torre extends JComponent {
+public abstract class Torre extends Componente {
 	// Vida da torre
-//	private int vida, vidaMax;
+	private int vida, vidaMax;
 
 	// Status da torre
 	// Raio de ataque
@@ -35,13 +38,16 @@ public abstract class Torre extends JComponent {
 	private boolean mouseOver;
 
 	// Imagem
-	private Rectangle imagem;
+	private Rectangle image;
+	private static Imagem vendaBotao;
+	private static Imagem upgradeBotao;
 	private Color color;
 
 	// Construtor usando todas as informações
-	public Torre(int tipo, int x, int y, int custo, int range, Color cor) {
+	public Torre(int tipo, int x, int y, int custo, int range, int vida, Color cor) {
+		this.vida = vida;
 		this.tipo = tipo;
-		this.imagem = new Rectangle(x, y, 50, 50);
+		this.image = new Rectangle(x, y, 50, 50);
 		this.color = cor;
 		this.rangeBase = range;
 		this.range = range;
@@ -50,23 +56,23 @@ public abstract class Torre extends JComponent {
 		this.vendaCusto = custo;
 		this.upgrade = 0;
 		this.upgradeCusto = custo + custo * (upgrade + 1);
-		setBounds(imagem);
+		setBounds(image);
 	}
 
 	// Construtor para compra
-	public Torre(int tipo, double x, double y, int custo, Color cor) {
+	public Torre(int tipo, int x, int y, int custo, Color cor) {
 		this.tipo = tipo;
 		this.color = cor;
 		this.custo = custo;
-		this.imagem = new Rectangle((int) x, (int) y, 50, 50);
-		setBounds(imagem);
+		this.image = new Rectangle((int) x, (int) y, 50, 50);
+		setBounds(image);
 	}
 
 	// Construtor para lista de compra
 	public Torre(int tipo, Color cor) {
 		this.tipo = tipo;
-		this.imagem = new Rectangle(50, 50);
-		setBounds(imagem);
+		this.image = new Rectangle(50, 50);
+		setBounds(image);
 		this.color = cor;
 	}
 
@@ -77,9 +83,14 @@ public abstract class Torre extends JComponent {
 
 	// Retorna imagem da torre
 	public Rectangle getImagem() {
-		return imagem;
+		return image;
 	}
 
+	// Subtrai vida
+	public void subVida(int x) {
+		this.vida -= x;
+	}
+	
 	// Retorna tipo da torre
 	public int getTipo() {
 		return tipo;
@@ -163,10 +174,15 @@ public abstract class Torre extends JComponent {
 		return mouseOver;
 	}
 
+	// Retorna se torre esta destruida ou nao
+	public boolean isDead() {
+		return (vida <= 0);
+	}
+	
 	// Desenha a torre na tela
 	public void draw(Graphics2D g) {
 		g.setColor(getColor());
-		g.fillRect(getImagem().x + 5, getImagem().y + 5, getImagem().width - 10, getImagem().height - 10);
+		g.fillRect(getX() + 5, getY() + 5, getWidth() - 10, getHeight() - 10);
 		// Desenha range e informações de compra e venda
 		// Caso mouse esteja sobre a torre
 		if (mouseOver) {
@@ -176,7 +192,6 @@ public abstract class Torre extends JComponent {
 			if (isUpgradable()) {
 				g.setColor(Color.black);
 				g.setFont(new Font("Arial", Font.PLAIN, 20));
-				g.drawString("Upgrade", getX() - 5, getY() - 30);
 				g.drawString(String.valueOf(getUpgradeCusto()), getX() + 10, getY());
 			}
 			g.setColor(Color.black);
@@ -204,7 +219,7 @@ public abstract class Torre extends JComponent {
 
 	public abstract void calculateRange(ArrayList<Monstro> monstros, ArrayList<Torre> torres);
 
-	public abstract boolean upgrade();
+	public abstract void upgrade();
 
 	public abstract void update(ArrayList<Torre> torres, ArrayList<Monstro> monstros);
 }

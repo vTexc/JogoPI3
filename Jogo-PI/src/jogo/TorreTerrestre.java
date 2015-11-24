@@ -29,7 +29,7 @@ public class TorreTerrestre extends Torre {
 
 	// Construtor após compra
 	public TorreTerrestre(int x, int y, double atqTime, int dano) {
-		super(Mapa.TORRE_T, x, y, 15, 75, Color.green);
+		super(Mapa.TORRE_T, x, y, 15, 75, 40, Color.green);
 		this.danoBase = dano;
 		this.dano = dano;
 		this.danoAtual = dano;
@@ -39,12 +39,12 @@ public class TorreTerrestre extends Torre {
 
 	// Construtor durante compra
 	public TorreTerrestre(double x, double y) {
-		super(4, x, y, 15, Color.green);
+		super(Mapa.TORRE_T, (int) x, (int) y, 15, Color.green);
 	}
 
 	// Construtor antes da compra
 	public TorreTerrestre() {
-		super(4, Color.green);
+		super(Mapa.TORRE_T, Color.green);
 	}
 
 	// Ataca
@@ -54,8 +54,8 @@ public class TorreTerrestre extends Torre {
 			if (atqTime < maxAtqTime) {
 				atqTime += Renderer.deltaTime * PlayState.gameSpeed;
 			} else {
-				tiros.add(new Tiro(getX() + 25, getY() + 25, (int) target.getPosicaoX() + target.getWidth() / 2,
-						(int) target.getPosicaoY() + target.getHeight() / 2, this.getRangeAtual(), danoAtual, target));
+				tiros.add(new Tiro(getX() + 25, getY() + 25, (int) target.getX() + target.getWidth() / 2,
+						(int) target.getY() + target.getHeight() / 2, this.getRangeAtual(), danoAtual, target));
 				atqTime = 0;
 			}
 		}
@@ -105,9 +105,9 @@ public class TorreTerrestre extends Torre {
 	// Retorna para o mais próximo do final
 	public void calculateRange(ArrayList<Monstro> monstros, ArrayList<Torre> torres) {
 		for (Monstro m : monstros) {
-			if (m.getTipo() == 2 && m.getX() > 0 && m.getX() < Renderer.WIDTH) {
-				int dx = (int) ((m.getPosicaoX() + m.getWidth()) - (this.getX() + this.getWidth() / 2));
-				int dy = (int) ((m.getPosicaoY() + m.getHeight()) - (this.getY() + this.getHeight() / 2));
+			if ((m.getTipo() == Mapa.TERRESTRE || m.getTipo() == Mapa.DESTRUIDOR) && m.getX() > 0 && m.getX() < Renderer.WIDTH) {
+				int dx = (int) ((m.getX() + m.getWidth()) - (this.getX() + this.getWidth() / 2));
+				int dy = (int) ((m.getY() + m.getHeight()) - (this.getY() + this.getHeight() / 2));
 
 				if (Math.sqrt((dx * dx) + (dy * dy)) <= this.getRangeAtual()) {
 					this.target = m;
@@ -120,7 +120,7 @@ public class TorreTerrestre extends Torre {
 	}
 
 	// Alterações quando der upgrade
-	public synchronized boolean upgrade() {
+	public synchronized void upgrade() {
 		if (getUpgrade() < 6 && (HUD.getInstancia().getRecursos() - this.getUpgradeCusto()) >= 0) {
 			this.setVendaCusto(this.getUpgradeCusto());
 			this.addUpgrade();
@@ -129,10 +129,7 @@ public class TorreTerrestre extends Torre {
 			this.setRange(this.getRange() + this.getRangeBase() / 5);
 			this.dano += this.danoBase / 0.5;
 			this.maxAtqTime -= 0.1;
-
-			return true;
 		}
-		return false;
 	}
 
 	// Atualiza informação da torre

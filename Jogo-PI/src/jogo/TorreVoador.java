@@ -29,7 +29,7 @@ public class TorreVoador extends Torre {
 
 	// Construtor após compra
 	public TorreVoador(int x, int y, double atqTime, int dano) {
-		super(Mapa.TORRE_V, x, y, 20, 100, Color.yellow);
+		super(Mapa.TORRE_V, x, y, 20, 100, 20, Color.yellow);
 		this.danoBase = dano;
 		this.dano = dano;
 		this.danoAtual = dano;
@@ -39,12 +39,12 @@ public class TorreVoador extends Torre {
 
 	// COnstrutor durante compra
 	public TorreVoador(double x, double y) {
-		super(5, x, y, 20, Color.yellow);
+		super(Mapa.TORRE_V, (int) x, (int) y, 20, Color.yellow);
 	}
 
 	// Construtor antes da compra
 	public TorreVoador() {
-		super(5, Color.yellow);
+		super(Mapa.TORRE_V, Color.yellow);
 	}
 
 	// Ataca
@@ -54,7 +54,7 @@ public class TorreVoador extends Torre {
 			if (atqTime < maxAtqTime) {
 				atqTime += 0.02 * PlayState.gameSpeed;
 			} else {
-				tiros.add(new Tiro(getX() + 25, getY() + 25, (int) target.getPosicaoX() + target.getWidth() / 2, (int) target.getPosicaoY() + target.getHeight()
+				tiros.add(new Tiro(getX() + 25, getY() + 25, (int) target.getX() + target.getWidth() / 2, (int) target.getY() + target.getHeight()
 						/ 2, this.getRangeAtual(), danoAtual, target));
 				atqTime = 0;
 			}
@@ -105,9 +105,9 @@ public class TorreVoador extends Torre {
 	// Retorna para o mais próximo do final
 	public void calculateRange(ArrayList<Monstro> monstros, ArrayList<Torre> torres) {
 		for (Monstro m : monstros) {
-			if (m.getTipo() == 3 && m.getX() > 0 && m.getX() < Renderer.WIDTH) {
-				int dx = (int) ((m.getPosicaoX() + m.getWidth()) - (this.getX() + this.getWidth() / 2));
-				int dy = (int) ((m.getPosicaoY() + m.getHeight()) - (this.getY() + this.getHeight() / 2));
+			if (m.getTipo() == Mapa.VOADOR && m.getX() > 0 && m.getX() < Renderer.WIDTH) {
+				int dx = (int) ((m.getX() + m.getWidth()) - (this.getX() + this.getWidth() / 2));
+				int dy = (int) ((m.getY() + m.getHeight()) - (this.getY() + this.getHeight() / 2));
 
 				if (Math.sqrt((dx * dx) + (dy * dy)) <= this.getRangeAtual()) {
 					this.target = m;
@@ -120,7 +120,7 @@ public class TorreVoador extends Torre {
 	}
 
 	// Alterações quando der upgrade
-	public synchronized boolean upgrade() {
+	public synchronized void upgrade() {
 		if (getUpgrade() < 6 && (HUD.getInstancia().getRecursos() - this.getUpgradeCusto()) >= 0) {
 			this.setVendaCusto(this.getUpgradeCusto());
 			this.addUpgrade();
@@ -129,10 +129,7 @@ public class TorreVoador extends Torre {
 			this.setRange(this.getRange() + this.getRangeBase() / 5);
 			this.dano += this.danoBase / 0.5;
 			this.maxAtqTime -= 0.1;
-
-			return true;
 		}
-		return false;
 	}
 
 	// Atualiza informação da torre

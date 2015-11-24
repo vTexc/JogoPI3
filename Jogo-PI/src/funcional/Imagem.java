@@ -14,7 +14,7 @@ public class Imagem {
 
 	// Tempo de mudança dos frames
 	private long startTime;
-	private long delay;
+	private double delay;
 
 	// Verifica se ja rodou uma vez
 	private boolean playedOnce;
@@ -24,7 +24,7 @@ public class Imagem {
 		colisao = new Ellipse2D.Float(x, y, raio, raio);
 	}
 
-	// Consturtor para colisão retangular
+	// Construtor para colisão retangular
 	public Imagem(int x, int y, int w, int h) {
 		this();
 		colisao = new Rectangle(x, y, w, h);
@@ -54,12 +54,12 @@ public class Imagem {
 	}
 
 	// Seta o delay dos frames
-	public void setDelay(long d) {
-		delay = d;
+	public void setDelay(double deltaTime) {
+		delay = deltaTime;
 	}
 
 	// Retorna o delay dos frames
-	public long getDelay() {
+	public double getDelay() {
 		return delay;
 	}
 
