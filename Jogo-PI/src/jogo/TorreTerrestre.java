@@ -1,50 +1,85 @@
 package jogo;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.*;
+
+import javax.imageio.ImageIO;
 
 import GameStates.*;
 import funcional.*;
 
-@SuppressWarnings("serial")
 public class TorreTerrestre extends Torre {
 	// Alvo atual
 	private Monstro target;
-	
+
+	// Imagem do soldado
+	private static BufferedImage[][] sprites;
+	private static Imagem soldado;
+	private AffineTransform at;
+
+	// Angulo para imagem
+	double angulo;
+
 	// Informações de suporte
 	private boolean suporte;
 	private double suporteValue;
-	
+
 	// Informações de dano da torre
-	private int danoBase;
 	private int dano;
 	private int danoAtual;
-	
+
 	// Tempo de ataque
 	private double atqTime = 1;
 	private double maxAtqTime;
-	
+
 	// Lista dos tiros desta torre
 	private ArrayList<Tiro> tiros;
 
 	// Construtor após compra
 	public TorreTerrestre(int x, int y, double atqTime, int dano) {
-		super(Mapa.TORRE_T, x, y, 15, 75, 40, Color.green);
-		this.danoBase = dano;
+		super(Mapa.TORRE_T, x, y, 15, 75, 15);
 		this.dano = dano;
 		this.danoAtual = dano;
 		this.maxAtqTime = atqTime;
 		tiros = new ArrayList<Tiro>();
+
+		if (sprites == null || soldado == null) {
+			try {
+				BufferedImage spritesheet = ImageIO
+						.read(getClass().getResourceAsStream("/Sprites/Torres/Torre_Terrestre.png"));
+
+				sprites = new BufferedImage[2][3];
+				sprites[0][0] = spritesheet.getSubimage(0, 0, this.getWidth(), this.getHeight());
+
+				for (int i = 0; i < sprites[1].length; i++) {
+					sprites[1][i] = spritesheet.getSubimage(i * this.getWidth(), this.getHeight(), this.getWidth(),
+							this.getHeight());
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			soldado = new Imagem();
+			soldado.setFrames(sprites[1]);
+			soldado.setDelay(100);
+		}
+
+		imagem = new Imagem();
+		imagem.setFrames(sprites[0]);
+		imagem.setDelay(-1);
 	}
 
 	// Construtor durante compra
 	public TorreTerrestre(double x, double y) {
-		super(Mapa.TORRE_T, (int) x, (int) y, 15, Color.green);
+		super(Mapa.TORRE_T, (int) x, (int) y, 15);
 	}
 
 	// Construtor antes da compra
 	public TorreTerrestre() {
-		super(Mapa.TORRE_T, Color.green);
+		super(Mapa.TORRE_T, 15);
 	}
 
 	// Ataca
@@ -75,6 +110,7 @@ public class TorreTerrestre extends Torre {
 	// Desenha torre na tela
 	public void draw(Graphics2D g) {
 		super.draw(g);
+		g.drawImage(soldado.getImage(), at, null);
 		for (Tiro t : tiros) {
 			t.draw(g);
 		}
@@ -104,32 +140,22 @@ public class TorreTerrestre extends Torre {
 	// Calcula monstros em área de ataque
 	// Retorna para o mais próximo do final
 	public void calculateRange(ArrayList<Monstro> monstros, ArrayList<Torre> torres) {
+		at = AffineTransform.getTranslateInstance(this.getX(), this.getY());
 		for (Monstro m : monstros) {
-			if ((m.getTipo() == Mapa.TERRESTRE || m.getTipo() == Mapa.DESTRUIDOR) && m.getX() > 0 && m.getX() < Renderer.WIDTH) {
+			if ((m.getTipo() == Mapa.TERRESTRE || m.getTipo() == Mapa.DESTRUIDOR) && m.intersects(getAlcance())) {
 				int dx = (int) ((m.getX() + m.getWidth()) - (this.getX() + this.getWidth() / 2));
 				int dy = (int) ((m.getY() + m.getHeight()) - (this.getY() + this.getHeight() / 2));
 
-				if (Math.sqrt((dx * dx) + (dy * dy)) <= this.getRangeAtual()) {
-					this.target = m;
-					return;
-				}
+				this.target = m;
+
+				// Angulo entre os pontos
+				angulo = Math.atan2(dy, dx);
+
+				return;
 			}
 		}
 		this.target = null;
 		return;
-	}
-
-	// Alterações quando der upgrade
-	public synchronized void upgrade() {
-		if (getUpgrade() < 6 && (HUD.getInstancia().getRecursos() - this.getUpgradeCusto()) >= 0) {
-			this.setVendaCusto(this.getUpgradeCusto());
-			this.addUpgrade();
-			HUD.getInstancia().subRecursos(this.getUpgradeCusto());
-			this.setUpgradeCusto(this.getCusto() + this.getCusto() * (this.getUpgrade() + 1));
-			this.setRange(this.getRange() + this.getRangeBase() / 5);
-			this.dano += this.danoBase / 0.5;
-			this.maxAtqTime -= 0.1;
-		}
 	}
 
 	// Atualiza informação da torre
@@ -138,6 +164,9 @@ public class TorreTerrestre extends Torre {
 		calculateRange(monstros, torres);
 		tirosUpdate();
 
+		// Atualiza transformador da imagem
+		at.rotate(angulo, this.getWidth() / 2, this.getHeight() / 2);
+
 		if (suporte) {
 			this.setRangeAtual((int) (this.getRange() + this.getRange() * suporteValue));
 			this.danoAtual = (int) (this.dano + this.dano * suporteValue);
@@ -145,6 +174,8 @@ public class TorreTerrestre extends Torre {
 			this.setRangeAtual(this.getRange());
 			this.danoAtual = this.dano;
 		}
+
+		setAlcance();
 		this.suporte = false;
 	}
 }

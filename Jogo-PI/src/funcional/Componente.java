@@ -1,7 +1,6 @@
 package funcional;
 
 import java.awt.*;
-import java.awt.geom.*;
 
 public abstract class Componente {
 	// Posição do componente
@@ -115,6 +114,6 @@ public abstract class Componente {
 	
 	// Verifica interseção
 	public boolean intersects(Shape shape) {
-		return (new Rectangle((int) x, (int) y, width, height).intersects(shape.getBounds2D()));
+		return (new Rectangle((int) x, (int) y, width, height).intersects(shape.getBounds()));
 	}
 }

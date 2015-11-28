@@ -1,26 +1,31 @@
 package jogo;
 
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.*;
 
-import javax.swing.*;
+import javax.imageio.ImageIO;
 
 import funcional.Componente;
 import funcional.Imagem;
 
-@SuppressWarnings("serial")
 public abstract class Torre extends Componente {
 	// Vida da torre
-	private int vida, vidaMax;
+	private double vida, vidaMax;
 
+	// Barra de vida
+	private Rectangle lifeBar;
+
+	// Colisao do range
+	private Ellipse2D alcance;
+	
 	// Status da torre
 	// Raio de ataque
 	private int rangeBase; // Base
 	private int range; // Auxiliar
 	private int rangeAtual; // Atual
-
-	// Level da torre
-	private int upgrade;
 
 	// Custo de venda
 	private int vendaCusto;
@@ -29,7 +34,7 @@ public abstract class Torre extends Componente {
 	private int custo;
 
 	// Custo de upgrade
-	private int upgradeCusto;
+	private int recoverCost;
 
 	// Tipo (Terrestre, Voador, Destruidor)
 	private int tipo;
@@ -37,60 +42,56 @@ public abstract class Torre extends Componente {
 	// Verifica se mouse esta sobre esta torre
 	private boolean mouseOver;
 
-	// Imagem
-	private Rectangle image;
-	private static Imagem vendaBotao;
-	private static Imagem upgradeBotao;
-	private Color color;
+	// Imagens
+	protected Imagem imagem;
+	private static BufferedImage vendaBotao;
+	private static BufferedImage recoverBotao;
 
 	// Construtor usando todas as informações
-	public Torre(int tipo, int x, int y, int custo, int range, int vida, Color cor) {
+	public Torre(int tipo, int x, int y, int custo, int range, int vida) {
+		super(50, 50);
 		this.vida = vida;
+		this.vidaMax = vida;
 		this.tipo = tipo;
-		this.image = new Rectangle(x, y, 50, 50);
-		this.color = cor;
 		this.rangeBase = range;
 		this.range = range;
 		this.rangeAtual = range;
 		this.custo = custo;
-		this.vendaCusto = custo;
-		this.upgrade = 0;
-		this.upgradeCusto = custo + custo * (upgrade + 1);
-		setBounds(image);
+		this.vendaCusto = (int) (custo * 0.67);
+		this.recoverCost = (int) (custo + custo * 0.8);
+		setBounds(x, y, this.getWidth(), this.getHeight());
+		alcance = new Ellipse2D.Float();
+		this.lifeBar = new Rectangle(this.getX(), this.getY() + 40, this.getWidth(), 5);
+		
+		try {
+			vendaBotao = ImageIO.read(getClass().getResourceAsStream("/Sprites/Torres/sell.png"));
+			recoverBotao = ImageIO.read(getClass().getResourceAsStream("/Sprites/Torres/recover.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		setAlcance();
 	}
 
 	// Construtor para compra
-	public Torre(int tipo, int x, int y, int custo, Color cor) {
+	public Torre(int tipo, int x, int y, int custo) {
+		super(50, 50);
 		this.tipo = tipo;
-		this.color = cor;
 		this.custo = custo;
-		this.image = new Rectangle((int) x, (int) y, 50, 50);
-		setBounds(image);
+		setBounds(x, y, this.getWidth(), this.getHeight());
 	}
 
 	// Construtor para lista de compra
-	public Torre(int tipo, Color cor) {
+	public Torre(int tipo, int custo) {
+		super(50, 50);
 		this.tipo = tipo;
-		this.image = new Rectangle(50, 50);
-		setBounds(image);
-		this.color = cor;
-	}
-
-	// Retorna cor (Temporario)
-	public Color getColor() {
-		return color;
-	}
-
-	// Retorna imagem da torre
-	public Rectangle getImagem() {
-		return image;
+		this.custo = custo;
 	}
 
 	// Subtrai vida
 	public void subVida(int x) {
 		this.vida -= x;
 	}
-	
+
 	// Retorna tipo da torre
 	public int getTipo() {
 		return tipo;
@@ -101,24 +102,14 @@ public abstract class Torre extends Componente {
 		return custo;
 	}
 
-	// Retorna custo de upgrade
-	public int getUpgradeCusto() {
-		return upgradeCusto;
-	}
-
-	// Altera custo de upgrade
-	public void setUpgradeCusto(int custo) {
-		this.upgradeCusto = custo;
+	// Retorna custo de recover
+	public int getRecoverCost() {
+		return recoverCost;
 	}
 
 	// Retorna custo de venda
 	public int getVendaCusto() {
 		return vendaCusto;
-	}
-
-	// Altera custo de venda
-	public void setVendaCusto(int custo) {
-		this.vendaCusto = custo;
 	}
 
 	// Retorna range base
@@ -146,24 +137,6 @@ public abstract class Torre extends Componente {
 		this.rangeAtual = range;
 	}
 
-	// Retorna upgrade
-	public int getUpgrade() {
-		return upgrade;
-	}
-
-	// Aumenta upgrade
-	public void addUpgrade() {
-		upgrade++;
-	}
-
-	// Verifica se da para dar upgrade
-	public boolean isUpgradable() {
-		if (upgrade < 6)
-			return true;
-		else
-			return false;
-	}
-
 	// Seta true caso mouse esteja sobre a torre
 	public void setMouseOver(boolean x) {
 		this.mouseOver = x;
@@ -178,33 +151,55 @@ public abstract class Torre extends Componente {
 	public boolean isDead() {
 		return (vida <= 0);
 	}
+
+	// Altera alcance
+	public void setAlcance() {
+		alcance.setFrame(getX() - rangeAtual + getWidth() / 2, getY() - rangeAtual + getHeight() / 2, rangeAtual * 2, rangeAtual * 2);
+	}
+	
+	// Retorna alcance
+	public Ellipse2D getAlcance() {
+		return alcance;
+	}
+	
+	// Atualiza informaçoes da torre
+	public void recover() {
+		if(this.vida != this.vidaMax && HUD.getInstancia().getRecursos() - this.recoverCost >= 0) {
+			this.vidaMax++;
+			this.vida = this.vidaMax;
+			recoverCost += 2;
+		}
+	}
 	
 	// Desenha a torre na tela
 	public void draw(Graphics2D g) {
-		g.setColor(getColor());
-		g.fillRect(getX() + 5, getY() + 5, getWidth() - 10, getHeight() - 10);
+		// Desenha torre
+		g.drawImage(imagem.getImage(), this.getX(), this.getY(), null);
 		// Desenha range e informações de compra e venda
 		// Caso mouse esteja sobre a torre
 		if (mouseOver) {
+			g.setColor(new Color(0.5f, 0.5f, 0.5f, 0.7f));
+			g.draw(getAlcance());
 			g.setColor(new Color(0.5f, 0.5f, 0.5f, 0.2f));
-			g.fillOval(getX() - rangeAtual + getWidth() / 2, getY() - rangeAtual + getHeight() / 2, rangeAtual * 2, rangeAtual * 2);
-			// Se der para dar upgrade, mostrar o valor de upgrade
-			if (isUpgradable()) {
-				g.setColor(Color.black);
-				g.setFont(new Font("Arial", Font.PLAIN, 20));
-				g.drawString(String.valueOf(getUpgradeCusto()), getX() + 10, getY());
-			}
+			g.fill(getAlcance());
+			
 			g.setColor(Color.black);
 			g.setFont(new Font("Arial", Font.PLAIN, 20));
-			g.drawString(String.valueOf(getVendaCusto()), getX() + 13, getY() + 80);
-			g.drawString("Venda", getX(), getY() + 100);
+			g.drawString(String.valueOf(getRecoverCost()), getX() + 13, getY());
+			g.drawImage(recoverBotao, getX() + getWidth() / 2 - 15, getY() - 45, null);
+			g.drawString(String.valueOf(getVendaCusto()), getX() + 13, getY() + getHeight() + 10);
+			g.drawImage(vendaBotao, getX() + getWidth() / 2 - 15, getY() + getHeight() / 2 + 35, null);
+		}
+
+		// Barra de vida da torre
+		if (vida != vidaMax) {
+			g.setColor(Color.RED);
+			g.draw(lifeBar);
+			g.fill(lifeBar);
+			g.setColor(Color.green);
+			g.fillRect(lifeBar.x, lifeBar.y, (int) (getWidth() * vida / vidaMax), lifeBar.height);
 			g.setColor(Color.black);
-			g.setFont(new Font("Arial", Font.PLAIN, 50));
-			g.drawString(String.valueOf(upgrade), getX() + 10, getY() + 45);
-		} else {
-			g.setColor(new Color(0f, 0f, 0f, 0.4f));
-			g.setFont(new Font("Arial", Font.PLAIN, 50));
-			g.drawString(String.valueOf(upgrade), getX() + 10, getY() + 45);
+			g.draw(lifeBar);
 		}
 	}
 
@@ -218,8 +213,6 @@ public abstract class Torre extends Componente {
 	public abstract void setSuporte(boolean suporte);
 
 	public abstract void calculateRange(ArrayList<Monstro> monstros, ArrayList<Torre> torres);
-
-	public abstract void upgrade();
 
 	public abstract void update(ArrayList<Torre> torres, ArrayList<Monstro> monstros);
 }

@@ -8,13 +8,10 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 
-import javax.swing.JComponent;
-
 import funcional.*;
 import AEstrela.*;
 import GameStates.*;
 
-@SuppressWarnings("serial")
 public abstract class Monstro extends Componente implements Cloneable{
 	// HP do monstro
 	private double vida, vidaMax;
@@ -32,7 +29,7 @@ public abstract class Monstro extends Componente implements Cloneable{
 
 	// Imagem do monstro
 	protected Imagem imagem;
-	AffineTransform at;
+	private AffineTransform at;
 
 	// Caminho a ser percorrido
 	private Caminho caminho;
@@ -53,8 +50,8 @@ public abstract class Monstro extends Componente implements Cloneable{
 	public Monstro(int tipo, int vida, double speed, int w, int h, int recurso) {
 		super(w, h);
 		this.tipo = tipo;
-		this.setX(Mapa.getIntance().getEntradaY() * 50 - 25);
-		this.setY(Mapa.getIntance().getEntradaX() * 50  + (50 - this.getHeight()));
+		this.setX(Mapa.getIntance().getEntradaX() * 50 - 25);
+		this.setY(Mapa.getIntance().getEntradaY() * 50  + (50 - this.getHeight()));
 		this.vidaMax = vida;
 		this.vida = vida;
 		this.recurso = recurso;
@@ -75,6 +72,11 @@ public abstract class Monstro extends Componente implements Cloneable{
 	
 	// Adiciona x na vida do monstro
 	public void addVida(double vidaMax) {
+		this.vidaMax += this.vidaMax * vidaMax;
+		this.vida = this.vidaMax;
+	}
+	
+	public void addVida(int vidaMax) {
 		this.vidaMax += vidaMax;
 		this.vida = this.vidaMax;
 	}
@@ -120,13 +122,19 @@ public abstract class Monstro extends Componente implements Cloneable{
 		this.slow = x;
 	}
 
+	// Procura caminho
+	public boolean buscarCaminho(PathFinder finder) {
+		Caminho caminhoAux = finder.findPath(this.tipo, this.getX() / 50, this.getY() / 50, Mapa.getIntance().getSaidaX(), Mapa.getIntance().getSaidaY());
+		return (caminhoAux != null);
+	}
+	
 	// Atualiza o caminho do monstro
 	public void atualizarCaminho(PathFinder finder) {
 		if (getX() / 50 < Mapa.WIDTH && getX() / 50 >= 0 ) {
 			this.index = 1;
-			this.caminho = finder.findPath(tipo, getX() / 50, getY() / 50, Mapa.getIntance().getSaidaY(), Mapa.getIntance().getSaidaX());
+			this.caminho = finder.findPath(tipo, getX() / 50, getY() / 50, Mapa.getIntance().getSaidaX(), Mapa.getIntance().getSaidaY());
 			if (caminho != null)
-				this.caminho.appendStep(Mapa.getIntance().getSaidaY() + 1, Mapa.getIntance().getSaidaX());
+				this.caminho.appendStep(Mapa.getIntance().getSaidaX() + 1, Mapa.getIntance().getSaidaY());
 		}
 	}
 
@@ -210,7 +218,6 @@ public abstract class Monstro extends Componente implements Cloneable{
 		try {
 			return super.clone();
 		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;

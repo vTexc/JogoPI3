@@ -1,33 +1,55 @@
 package jogo;
 
-import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
+
+import javax.imageio.ImageIO;
 
 import funcional.*;
 
-@SuppressWarnings("serial")
 public class TorreSuporte extends Torre {
+	// Imagem torre
+	private static BufferedImage[] sprites;
+
 	// Valor de aumento para torres
 	private double suporteValue;
-	
+
 	// Valor de slow para monstros
 	private double slowValue;
 
 	// Construtor após compra
 	public TorreSuporte(int x, int y) {
-		super(Mapa.TORRE_S, x, y, 50, 125, 10, Color.magenta);
+		super(Mapa.TORRE_S, x, y, 50, 125, 5);
 		this.suporteValue = 0.3;
 		this.slowValue = 0.3;
+
+		if (sprites == null) {
+			try {
+				BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream("/Sprites/Torres/Torre_Suporte.png"));
+
+				sprites = new BufferedImage[1];
+				for (int i = 0; i < sprites.length; i++) {
+					sprites[i] = spritesheet.getSubimage(i * this.getWidth(), 0, this.getWidth(), this.getHeight());
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		imagem = new Imagem();
+		imagem.setFrames(sprites);
+		imagem.setDelay(-1);
 	}
 
 	// Construtor durante compra
 	public TorreSuporte(double x, double y) {
-		super(Mapa.TORRE_S, (int) x, (int) y, 50, Color.magenta);
+		super(Mapa.TORRE_S, (int) x, (int) y, 50);
 	}
 
 	// Construtor antes da compra
 	public TorreSuporte() {
-		super(Mapa.TORRE_S, Color.magenta);
+		super(Mapa.TORRE_S, 50);
 	}
 
 	/** Overrides */
@@ -35,43 +57,18 @@ public class TorreSuporte extends Torre {
 	// fazendo as alterações necessárias nos mesmos
 	public void calculateRange(ArrayList<Monstro> monstros, ArrayList<Torre> torres) {
 		for (Monstro m : monstros) {
-			if (m.getX() > 0 && m.getX() < Renderer.WIDTH) {
-				int dx = (int) ((m.getX() + m.getWidth() / 2) - (this.getX() + this.getWidth() / 2));
-				int dy = (int) ((m.getY() + m.getHeight() / 2) - (this.getY() + this.getHeight() / 2));
-
-				if (Math.sqrt((dx * dx) + (dy * dy)) <= this.getRangeAtual()) {
-					m.setSlow(true);
-					if (this.slowValue > m.getSlowValue())
-						m.setSlowValue(this.slowValue);
-				}
+			if (m.intersects(getAlcance())) {
+				m.setSlow(true);
+				if (this.slowValue > m.getSlowValue())
+					m.setSlowValue(this.slowValue);
 			}
 		}
 		for (Torre t : torres) {
-			if (t.getTipo() != 6) {
-				int dx = (int) ((t.getImagem().getX() + t.getImagem().getWidth() / 2)
-						- (this.getX() + this.getWidth() / 2));
-				int dy = (int) ((t.getImagem().getY() + t.getImagem().getHeight() / 2)
-						- (this.getY() + this.getHeight() / 2));
-
-				if (Math.sqrt((dx * dx) + (dy * dy)) <= this.getRangeAtual()) {
-					t.setSuporte(true);
-					if (this.suporteValue > t.getSuporteValue())
-						t.setSuporteValue(this.suporteValue);
-				}
+			if (t.getTipo() != 6 && t.intersects(getAlcance())) {
+				t.setSuporte(true);
+				if (this.suporteValue > t.getSuporteValue())
+					t.setSuporteValue(this.suporteValue);
 			}
-		}
-	}
-
-	// Alterações quando der upgrade
-	public synchronized void upgrade() {
-		if (getUpgrade() < 6 && (HUD.getInstancia().getRecursos() - this.getUpgradeCusto()) >= 0) {
-			this.suporteValue += 0.02;
-			this.slowValue += 0.05;
-			this.setRange(this.getRange() + (this.getRangeBase() / 5));
-			this.setVendaCusto(this.getUpgradeCusto());
-			this.addUpgrade();
-			HUD.getInstancia().subRecursos(this.getUpgradeCusto());
-			this.setUpgradeCusto(this.getCusto() + this.getCusto() * (this.getUpgrade() + 1));
 		}
 	}
 

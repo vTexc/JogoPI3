@@ -1,15 +1,12 @@
 package jogo;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.*;
 
 import javax.imageio.ImageIO;
 
+import funcional.Renderer;
 import funcional.TileBasedMap;
 import AEstrela.PathFinder;
 
@@ -22,7 +19,6 @@ public class Mapa implements TileBasedMap {
 	public static final int HEIGHT = 13;
 
 	// Mapa
-	private int[][] mapaSemAlteracao;
 	private int[][][] mapa;
 	private int maxMaps;
 	private int currentMap;
@@ -31,7 +27,8 @@ public class Mapa implements TileBasedMap {
 	private BufferedImage[] tileSet;
 
 	// Valores determinantes da imagem
-	public static final int ENTRADA_SAIDA = -1;
+	public static final int ENTRADA = -2;
+	public static final int SAIDA = -1;
 	public static final int TERRENO = 0;
 	public static final int MURO = 1;
 	public static final int DESTRUIDOR = 2;
@@ -52,31 +49,32 @@ public class Mapa implements TileBasedMap {
 	// Construtor
 	private Mapa() {
 		try {
-			Scanner arquivo = new Scanner(getClass().getResourceAsStream("/map.txt"));
+			Scanner arquivo = new Scanner(getClass().getResourceAsStream("/map.map"));
 			maxMaps = arquivo.nextInt();
-			mapa = new int[maxMaps][HEIGHT][WIDTH];
+			mapa = new int[maxMaps][WIDTH][HEIGHT];
 			entradaX = new int[maxMaps];
 			entradaY = new int[maxMaps];
 			saidaX = new int[maxMaps];
 			saidaY = new int[maxMaps];
 			visitado = new boolean[WIDTH][HEIGHT];
-			tileSet = new BufferedImage[1];
+			tileSet = new BufferedImage[8];
 			BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream("/Sprites/TileSet.png"));
 
-			tileSet[0] = spritesheet.getSubimage(0, 0, 50, 50);
+			for (int y = 0; y < 8; y++) {
+				tileSet[y] = spritesheet.getSubimage((y % 4) * 50, (y / 4) * 50, 50, 50);
+			}
 
 			for (int z = 0; z < maxMaps; z++) {
-				for (int x = 0; x < HEIGHT; x++) {
-					for (int y = 0; y < WIDTH; y++) {
+				for (int y = 0; y < HEIGHT; y++) {
+					for (int x = 0; x < WIDTH; x++) {
 						mapa[z][x][y] = arquivo.nextInt();
+						if (mapa[z][x][y] == -2) {
+							entradaX[z] = x;
+							entradaY[z] = y;
+						}
 						if (mapa[z][x][y] == -1) {
-							if (y == 0) {
-								entradaX[z] = x;
-								entradaY[z] = y;
-							} else {
-								saidaX[z] = x;
-								saidaY[z] = y;
-							}
+							saidaX[z] = x;
+							saidaY[z] = y;
 						}
 					}
 				}
@@ -102,12 +100,11 @@ public class Mapa implements TileBasedMap {
 	public void currentMap() {
 		Random rand = new Random();
 		currentMap = rand.nextInt(maxMaps);
-		mapaSemAlteracao = mapa[currentMap];
 	}
 
 	// Reseta mapa atual
 	public void reset() {
-		mapa[currentMap] = mapaSemAlteracao;
+		instance = null;
 	}
 
 	// Retorna valor de entrada
@@ -130,12 +127,38 @@ public class Mapa implements TileBasedMap {
 
 	// Altera determinada posição do mapa
 	public void setMapa(int x, int y, int k) {
-		mapa[currentMap][y][x] = k;
+		mapa[currentMap][x][y] = k;
 	}
 
-	// Verifica se pode por torre ou não
-	private boolean placeTorre(int x, int y) {
-		return (mapa[currentMap][y][x] == Mapa.TERRENO);
+	// // Verifica se pode por torre em determinada posição
+	public synchronized int placingTorre(int x, int y, Torre torre, PathFinder finder, ArrayList<Monstro> monstros) {
+		if (HUD.getInstancia().getRecursos() - torre.getCusto() >= 0) {
+			if (x >= 0 && x < Renderer.WIDTH && y >= 0 && y < Renderer.HEIGHT) {
+				if (getTerrain(x / 50, y / 50) == Mapa.TERRENO) {
+					this.setMapa(x / 50, y / 50, torre.getTipo());
+					if (finder.findPath(TERRESTRE, Mapa.getIntance().getEntradaX(), Mapa.getIntance().getEntradaY(),
+							Mapa.getIntance().getSaidaX(), Mapa.getIntance().getSaidaY()) == null) {
+						this.setMapa(x / 50, y / 50, Mapa.TERRENO);
+						return 0;
+					} else {
+						for (Monstro m : monstros) {
+							if ((m.getTipo() != Mapa.VOADOR) && (!m.hasCaminho() || torre.intersects(m.getBounds()))) {
+								this.setMapa(x / 50, y / 50, Mapa.TERRENO);
+								return 0;
+							}
+						}
+					}
+					this.setMapa(x / 50, y / 50, Mapa.TERRENO);
+				} else {
+					return -1;
+				}
+			} else {
+				return -1;
+			}
+		} else {
+			return -1;
+		}
+		return 1;
 	}
 
 	// Coloca torre em determinado local do mapa
@@ -150,64 +173,56 @@ public class Mapa implements TileBasedMap {
 		else if (tipo == Mapa.TORRE_S)
 			torre = new TorreSuporte(x, y);
 
-		// Verifica se pode por torre na posição atual
-		if (placeTorre(x / 50, y / 50)) {
-			this.setMapa(x / 50, y / 50, torre.getTipo());
-			// Procura caminho
-			// Adiciona se achar caminho
-			if (finder.findPath(TERRESTRE, Mapa.getIntance().getEntradaY(), Mapa.getIntance().getEntradaX(),
-					Mapa.getIntance().getSaidaY(), Mapa.getIntance().getSaidaX()) != null) {
-				// Verifica se tem recursos suficientes
-				if (HUD.getInstancia().getRecursos() - torre.getCusto() >= 0) {
-					// Adiciona torre
-					torres.add(torre);
-					// Verifica se algum monstro via perder o caminho
-					for (Monstro m : monstros) {
-						m.atualizarCaminho(finder);
-						// Verifica se a torre esta sobre um monstro
-						if ((m.getTipo() != Mapa.VOADOR) && (!m.hasCaminho() || torre.intersects(m.getBounds()))) {
-							setMapa(x / 50, y / 50, 0);
-							torres.remove(torres.size() - 1);
-							m.atualizarCaminho(finder);
-							return;
-						}
-					}
-					// Diminui recurso
-					HUD.getInstancia().subRecursos(torre.getCusto());
-				}
-			} else {
-				setMapa(x / 50, y / 50, 0);
-			}
+		// Adiciona torre ao mapa e à lista
+		this.setMapa(x / 50, y / 50, torre.getTipo());
+		torres.add(torre);
+		// Verifica se algum monstro via perder o caminho
+		for (Monstro m : monstros) {
+			m.atualizarCaminho(finder);
 		}
+		// Diminui recurso
+		HUD.getInstancia().subRecursos(torre.getCusto());
 	}
 
 	// Deleta torre de determinada posição
 	public synchronized void deleteTorre(int x, int y, PathFinder finder, ArrayList<Torre> torres,
 			ArrayList<Monstro> monstros, Torre t) {
-		setMapa(x / 50, y / 50, 0);
+		// Seta o campo para terreno
+		setMapa(x / 50, y / 50, Mapa.TERRENO);
+		// Recupera recurso
 		HUD.getInstancia().addRecursos(torres.get(torres.indexOf(t)).getVendaCusto());
 		torres.remove(t);
 		// Atualiza caminho dos monstros
 		for (Monstro m : monstros) {
 			m.atualizarCaminho(finder);
 		}
-		// Recupera recurso
 	}
 
 	// Desenha mapa na tela
 	public void draw(Graphics2D g) {
-		for (int x = 0; x < HEIGHT; x++) {
-			for (int y = 0; y < WIDTH; y++) {
-				g.drawImage(tileSet[0], y * 50, x * 50, 50, 50, null);
+		for (int x = 0; x < WIDTH; x++) {
+			for (int y = 0; y < HEIGHT; y++) {
+				g.drawImage(tileSet[3], x * 50, y * 50, 50, 50, null);
 				if (mapa[currentMap][x][y] == Mapa.MURO) {
-					g.setColor(Color.gray);
-					g.fillRect(y * 50, x * 50, 50, 50);
-				} else if (mapa[currentMap][x][y] == Mapa.ENTRADA_SAIDA) {
-					g.setColor(new Color(255, 111, 155));
-					g.fillRect(y * 50, x * 50, 50, 50);
-				} else if (mapa[currentMap][x][y] == Mapa.ENTRADA_SAIDA) {
-					g.setColor(new Color(255, 111, 155));
-					g.fillRect(y * 50, x * 50, 50, 50);
+					g.drawImage(tileSet[0], x * 50, y * 50, 50, 50, null);
+					if (x != WIDTH - 1 ? mapa[currentMap][x + 1][y] == Mapa.MURO : false) {
+						g.drawImage(tileSet[7], x * 50, y * 50, 50, 50, null);
+					}
+					if (y != HEIGHT - 1 ? mapa[currentMap][x][y + 1] == Mapa.MURO : false) {
+						g.drawImage(tileSet[6], x * 50, y * 50, 50, 50, null);
+					}
+					if (x != 0 ? mapa[currentMap][x - 1][y] == Mapa.MURO : false) {
+						g.drawImage(tileSet[5], x * 50, y * 50, 50, 50, null);
+					}
+					if (y != 0 ? mapa[currentMap][x][y - 1] == Mapa.MURO : false) {
+						g.drawImage(tileSet[4], x * 50, y * 50, 50, 50, null);
+					}
+				} else {
+					if (mapa[currentMap][x][y] == Mapa.SAIDA) {
+						g.drawImage(tileSet[2], x * 50, y * 50, 50, 50, null);
+					} else if (mapa[currentMap][x][y] == Mapa.ENTRADA) {		
+						g.drawImage(tileSet[1], x * 50, y * 50, 50, 50, null);				
+					}
 				}
 			}
 		}
@@ -237,11 +252,11 @@ public class Mapa implements TileBasedMap {
 	// para dado tipo
 	public boolean blocked(int mover, int x, int y) {
 		if (mover == Mapa.VOADOR) {
-			return (mapa[currentMap][y][x] == Mapa.MURO);
+			return (mapa[currentMap][x][y] == Mapa.MURO);
 		}
 
 		if (mover == Mapa.TERRESTRE || mover == Mapa.DESTRUIDOR) {
-			return (mapa[currentMap][y][x] != Mapa.TERRENO && mapa[currentMap][y][x] != Mapa.ENTRADA_SAIDA);
+			return (mapa[currentMap][x][y] != Mapa.TERRENO && mapa[currentMap][x][y] != Mapa.SAIDA && mapa[currentMap][x][y] != Mapa.ENTRADA);
 		}
 
 		return true;

@@ -1,15 +1,19 @@
 package DecisionTree;
 
 public class DecisionTree {
+	// Raiz da arvore
 	private BinTree raiz = null;
+	
+	// Variaveis para uso
 	private double vidaPerdida;
 	private double tempoDecorrido;
 
-
+	// Construtor
 	public DecisionTree(double vida, double tempo) {
 		this.vidaPerdida = vida;
 		this.tempoDecorrido = tempo;
 
+		// Perguntas
 		String perguntaVida1 = (vidaPerdida > 0.0) ? "Yes" : "No";
 		String perguntaVida2 = (vidaPerdida <= 0.4) ? "Yes" : "No";
 		String perguntaTempo1 = (tempoDecorrido <= 0.5) ? "Yes" : "No";
@@ -27,10 +31,12 @@ public class DecisionTree {
 		addFalseNode(6, 9, "Tempo > 25%");
 	}
 
+	// Inicia arvore
 	public void init(int novoNoID, String pergunta) {
 		raiz = new BinTree(novoNoID, pergunta);
 	}
 
+	// Adiciona nó no lado true
 	public void addTrueNode(int noIDExistente, int novoNoID, String pergunta) {
 		if (raiz != null) {
 			if (procurarLugarTrueArvore(raiz, noIDExistente, novoNoID, pergunta)) {
@@ -40,6 +46,7 @@ public class DecisionTree {
 		}
 	}
 
+	// Procura o ultimo lugar true disponivel
 	private boolean procurarLugarTrueArvore(BinTree noAtual, int noIDExistente, int novoNoID, String pergunta) {
 		if (noAtual.nodeID == noIDExistente) {
 			// Encontrou o nó
@@ -65,6 +72,7 @@ public class DecisionTree {
 		}
 	}
 
+	// Adiciona nó no lado false
 	public void addFalseNode(int noIDExistente, int novoNoID, String pergunta) {
 		if (raiz != null) {
 			if (procurarLugarFalseArvore(raiz, noIDExistente, novoNoID, pergunta)) {
@@ -73,6 +81,7 @@ public class DecisionTree {
 		}
 	}
 
+	// Procura o ultimo lugar false disponivel
 	private boolean procurarLugarFalseArvore(BinTree noAtual, int noIDExistente, int novoNoID, String pergunta) {
 		if (noAtual.nodeID == noIDExistente) {
 			// Encontrou nó
@@ -98,10 +107,12 @@ public class DecisionTree {
 		}
 	}
 
+	// Pergunta para aarvore
 	public int queryBinTree() {
 		return queryBinTree(raiz);
 	}
 
+	// Percorre a arvore
 	private int queryBinTree(BinTree noAtual) {
 		// Testa para nós folhas
 		if (noAtual.trueArvore == null) {
@@ -112,6 +123,8 @@ public class DecisionTree {
 		return perguntar(noAtual);
 	}
 
+	// Pega a resposta das perguntas do construtor, cujo qual foram
+	// armazenadas no Nó
 	private int perguntar(BinTree noAtual) {
 		String answer = noAtual.resposta;
 
@@ -126,13 +139,20 @@ public class DecisionTree {
 		}
 	}
 
+	// Classe da arvore
 	private class BinTree {
 
+		// Numero do nó
 		private int nodeID;
+		
+		// Resposta
 		private String resposta = null;
+		
+		// Nós filhos
 		private BinTree trueArvore = null;
 		private BinTree falseArvore = null;
 
+		// Construtor
 		public BinTree(int newNodeID, String newQuestAns) {
 			nodeID = newNodeID;
 			resposta = newQuestAns;

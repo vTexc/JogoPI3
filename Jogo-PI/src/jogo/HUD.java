@@ -5,8 +5,6 @@ import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 
-import GameStates.*;
-import funcional.Imagem;
 import funcional.Renderer;
 
 public class HUD {
@@ -34,38 +32,21 @@ public class HUD {
 	// Font de impressão
 	private Font font;
 
-	// Gerenciador de estados do jogo
-	private GameStateManager gsm;
-
 	// Construtor do singleton normal
 	private HUD() {
 		wave = 0;
-		recursos = 30;
+		recursos = 50;
 		vidas = 20;
 		font = new Font("Arial", Font.PLAIN, 25);
 
 		griding = false;
 		loadImage();
 	}
-
-	// Construtor do singleton com GameStateManager
-	private HUD(GameStateManager gsm) {
-		this();
-		this.gsm = gsm;
-	}
-
+	
 	// Retorna instancia do hud normal
 	public static HUD getInstancia() {
 		if (instancia == null) {
 			initInstancia();
-		}
-		return instancia;
-	}
-
-	// Retorna instancia do hud com GameStateManager
-	public static HUD getInstancia(GameStateManager gsm) {
-		if (instancia == null) {
-			initInstancia(gsm);
 		}
 		return instancia;
 	}
@@ -91,25 +72,20 @@ public class HUD {
 		}
 	}
 
-	// Inizializa hud com GameStateManager
-	private static synchronized void initInstancia(GameStateManager gsm) {
-		if (instancia == null) {
-			instancia = new HUD(gsm);
-		}
-	}
-
 	// Retorna vidas
 	public int getVidas() {
 		return vidas;
 	}
 	
+	// Verifica se morreu
+	public boolean gameOver() {
+		return (vidas <= 0);
+	}
+	
 	// Reseta informações do hud
 	public void reset() {
-		wave = 0;
-		recursos = 30;
-		vidas = 20;
-		griding = false;
 		Mapa.getIntance().reset();
+		instancia = null;
 	}
 
 	// Retorna recursos
@@ -119,12 +95,16 @@ public class HUD {
 
 	// Adiciona x recursos
 	public void addRecursos(int x) {
-		this.recursos += x;
+		if(this.recursos + x >= 1000000) {
+			this.recursos = 999999;
+		} else {
+			this.recursos += x;
+		}
 	}
 
 	// Subtrai x recursos
 	public void subRecursos(int x) {
-		this.recursos -= x;
+			this.recursos -= x;
 	}
 
 	// Retorna wave atual
@@ -148,11 +128,6 @@ public class HUD {
 		sWave = "Wave : " + String.format("%03d", wave);
 		sVidas = String.format("%02d", vidas);
 		sTempoEspera = String.format("%.01f", Wave.getTempoAtual());
-		// Caso GameOver
-		if (vidas <= 0) {
-			reset();
-			gsm.setState(GameStateManager.MENU);
-		}
 	}
 
 	// Desenha hud na tela

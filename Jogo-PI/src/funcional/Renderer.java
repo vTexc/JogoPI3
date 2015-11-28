@@ -20,19 +20,19 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 	// Dimensoes
 	public static int WIDTH = 950;
 	public static int HEIGHT = 650;
-	
+
 	// Thread
 	private Thread thread;
 	private boolean running;
-	
+
 	// Controle de FPS pelo thread
 	private int FPS = 120;
 	private long targetTime = 1000 / FPS;
 	public int FRAMES;
-	
+
 	// Gerenciador do estado do jogo
 	private GameStateManager gsm;
-	
+
 	// Variação do tempo entre frames
 	public static double deltaTime;
 
@@ -65,7 +65,7 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 
 		gsm = new GameStateManager(); // Inizializa o gerenciador
 	}
-	
+
 	/** JPanel Overrides **/
 	// Desenha na tela
 	public void paintComponent(Graphics g) {
@@ -93,7 +93,7 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 			wait = targetTime - elapsed / 1000000;
 			deltaTime = (double) wait / 1000;
 			lastFrame += deltaTime;
-			
+
 			if (wait < 0)
 				wait = 5;
 
@@ -118,16 +118,16 @@ public class Renderer extends JPanel implements Runnable, Mouse {
 	// Desenha as informações na tela
 	private void draw(Graphics2D g) {
 		gsm.draw(g);
-		g.setColor(Color.BLACK);
-		g.setFont(new Font("Arial", Font.PLAIN, 15));
-		g.drawString(String.valueOf(FRAMES), 5, Renderer.HEIGHT);
+		// g.setColor(Color.BLACK);
+		// g.setFont(new Font("Arial", Font.PLAIN, 15));
+		// g.drawString(String.valueOf(FRAMES), 5, Renderer.HEIGHT);
 	}
 
 	/** Listeners Overrides **/
 	public void mouseDragged(MouseEvent e) {
 		gsm.mouseDragged(e);
 	}
-	
+
 	public void mouseMoved(MouseEvent e) {
 		gsm.mouseMoved(e);
 	}

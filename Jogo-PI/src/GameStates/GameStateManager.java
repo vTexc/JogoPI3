@@ -10,6 +10,8 @@ package GameStates;
 
 import java.awt.event.*;
 
+import funcional.Audio;
+
 public class GameStateManager {
 	// Gerenciar os estados
 	private GameState[] gameStates;
@@ -18,14 +20,31 @@ public class GameStateManager {
 
 	// Numero maximo de estados
 	public static final int NUMSTATES = 2;
+	
 	// Define todos os estados que o jogo pode ter
 	public static final int MENU = 0;
 	public static final int PLAY = 1;
 
+	public static final Audio[] bgMusic = {
+			 new Audio("/Audios/bg-menu.wav"),
+			 new Audio("/Audios/bg-game.wav")
+	};
+	
+	public static final Audio[] mouseMusic = {
+			new Audio("/Audios/mouse-over.wav"),
+			new Audio("/Audios/mouse-clicked.wav"),
+			new Audio("/Audios/go-click.wav")
+	};
+	
 	// Inicializa o gerenciador, selecionando um estado como inicial
 	public GameStateManager() {
 		gameStates = new GameState[NUMSTATES];
 
+		bgMusic[0].stop();
+		bgMusic[1].stop();
+		mouseMusic[0].stop();
+		mouseMusic[1].stop();
+		
 		currentState = MENU;
 		loadState(currentState);
 	}

@@ -32,7 +32,7 @@ public class Tiro {
 	private int dano;
 
 	// Imagem
-	private BufferedImage imagem;
+	private static BufferedImage imagem;
 	private AffineTransform at;
 
 	// Construtor
@@ -47,12 +47,14 @@ public class Tiro {
 		this.dist = dist;
 		this.distF = Math.sqrt(((xf - x) * (xf - x)) + ((yf - y) * (yf - y)));
 
-		try {
-			BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream("/Sprites/Torres/Tiro.png"));
-			imagem = spritesheet.getSubimage(0, 0, 9, 12);
+		if (imagem == null) {
+			try {
+				BufferedImage spritesheet = ImageIO.read(getClass().getResourceAsStream("/Sprites/Torres/Tiro.png"));
+				imagem = spritesheet.getSubimage(0, 0, 9, 12);
 
-		} catch (Exception e) {
-			e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

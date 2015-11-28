@@ -2,8 +2,6 @@ package jogo;
 
 import java.util.*;
 
-import org.tritonus.share.sampled.mixer.TMixerProvider;
-
 import funcional.Renderer;
 import AEstrela.*;
 import DecisionTree.DecisionTree;
@@ -31,7 +29,7 @@ public class Wave {
 	// Tempo decorrido da wave
 	private double tempoDecorrido;
 
-	// Uso na arvor ede decisao
+	/** Uso na arvore de decisao */
 	// Tempo
 	private double tempoTotal;
 
@@ -43,7 +41,8 @@ public class Wave {
 	private int vidaAdicional;
 	// Velocidade adicional pros montros
 	private double speedAdicional;
-
+	/**                      */
+	
 	// Verificadores de estados
 	private static boolean spawnar;
 	private static boolean gerar;
@@ -56,10 +55,10 @@ public class Wave {
 		this.maxSpawn = 1; // tempo entre spawns
 		this.maxMonstros = 5; // Maximo de monstros
 		this.qtdMonstros = 0;
-		this.spawnar = false;
-		this.gerar = false;
-		this.tempoEspera = 5; // tempo de espera entre waves
-		this.tempoAtual = 0;
+		Wave.spawnar = false;
+		Wave.gerar = false;
+		Wave.tempoEspera = 5; // tempo de espera entre waves
+		Wave.tempoAtual = 0;
 		this.vidaAdicional = 0;
 		this.speedAdicional = 0;
 		this.vidaAtual = HUD.getInstancia().getVidas();
@@ -69,9 +68,9 @@ public class Wave {
 	// Construtor com hardcore
 	public Wave(boolean hardcore) {
 		this();
-		this.hardcore = hardcore;
-		if (this.hardcore)
-			this.tempoEspera = 0;
+		Wave.hardcore = hardcore;
+		if (Wave.hardcore)
+			Wave.tempoEspera = 0;
 	}
 
 	// Retorna tempo atual
@@ -81,7 +80,7 @@ public class Wave {
 
 	// Altera tempo atual
 	public void setTempoAtual(double x) {
-		this.tempoAtual = x;
+		Wave.tempoAtual = x;
 	}
 
 	// Retorna tempo de espera
@@ -197,47 +196,46 @@ public class Wave {
 						// Ações da arvore
 						switch (arvoreDecisao.queryBinTree()) {
 						case 4: // Vida <= 40%
-							maxMonstros += 3;
+							maxMonstros += 1;
 							for (Monstro m : aux) {
-								m.addVida(3);
+								m.addVida(0.04);
 								m.addSpeedBase(m.getSpeedBase() * 0.05);
 							}
-							vidaAdicional += 3;
-							speedAdicional += (speedAdicional * 0.05);
+							vidaAdicional += 0.04;
+							speedAdicional += 0.05;
 							break;
 						case 5: // Vida > 40%
-							maxMonstros += 1;
 							for (Monstro m : aux) {
 								m.addSpeedBase(m.getSpeedBase() * 0.02);
 							}
-							speedAdicional += (speedAdicional * 0.02);
+							speedAdicional += 0.02;
 							break;
 						case 7: // Tempo > 50%
-							maxMonstros += 4;
+							maxMonstros += 2;
 							for (Monstro m : aux) {
-								m.addVida(1);
+								m.addVida(0.05);
 								m.addSpeedBase(m.getSpeedBase() * 0.01);
 							}
-							vidaAdicional += 1;
-							speedAdicional += (speedAdicional * 0.01);
+							vidaAdicional += 0.05;
+							speedAdicional += 0.01;
 							break;
 						case 8: // Tempo <= 25%
-							maxMonstros += 8;
+							maxMonstros += 3;
 							for (Monstro m : aux) {
-								m.addVida(4);
+								m.addVida(0.1);
 								m.addSpeedBase(m.getSpeedBase() * 0.05);
 							}
-							vidaAdicional += 4;
-							speedAdicional += (speedAdicional * 0.05);
+							vidaAdicional += 0.1;
+							speedAdicional += 0.05;
 							break;
 						case 9: // Tempo > 25%
-							maxMonstros += 6;
+							maxMonstros += 2;
 							for (Monstro m : aux) {
-								m.addVida(3);
+								m.addVida(0.35);
 								m.addSpeedBase(m.getSpeedBase() * 0.03);
 							}
-							vidaAdicional += 3;
-							speedAdicional += (speedAdicional * 0.03);
+							vidaAdicional += 0.08;
+							speedAdicional += 0.03;
 							break;
 						}
 						// Cancela arvorede decisao

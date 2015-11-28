@@ -3,7 +3,6 @@ package AEstrela;
 import java.util.*;
 
 import funcional.TileBasedMap;
-import jogo.Mapa;
 
 public class PathFinder {
 	// Conjunto de nós explorados
